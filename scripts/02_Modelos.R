@@ -121,13 +121,18 @@ Mod_1_LR_pred <- ifelse(Mod_1_LR_prob>0.5, "Pobre", "No Pobre")
 ### Modelo 3 -
 {
 # Es necesario los datos en forma de matriz 
-X_train <- as.matrix(cbind("aqui van las covariables"))
-X_test <- as.matrix(cbind("aqui van las covariables"))
+X_train <- train[, c(, , , , )]
+X_test <- test[, c(, , , , )]
+
+Y_train <- train[, Pobre]
+Y_test <- test[, Pobre]
 
 # Prediccion 
-Mod_3_KNN_pred <- knn(X_train, X_test, train$Pobre, k=1)
+Mod_3_KNN_pred <- knn(X_train, X_test, Y_train, k=3) # k=1
 
 table(Mod_3_KNN_pred, train$Pobre)
+library(gmodels)
+CrossTable(x=Y_test, y=Mod_3_KNN_pred)
 }
 
 ### Elastic Net --
