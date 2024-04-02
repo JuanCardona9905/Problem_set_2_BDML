@@ -29,6 +29,8 @@ p_load(rio, # importación/exportación de datos
        data.table, # para manipulación de datos
        MASS, # El paquete tiene a la funcion de LDA
        class, # El paquete tiene a la funcion de k-neighbours
+       gmodels,
+       tree,
        naniar) # missing
 
 #se define la ruta de trabajo
@@ -158,3 +160,90 @@ CrossTable(x=Y_test, y=Mod_3_KNN_pred)
   Mod_4_EN
   # Se escogieron los paramentros ...
 }
+
+#### Tree Models ----
+{
+  library(ISLR2)
+
+  #Asegurarme de que pobre este en formato "si" y "no"
+  tree_pobre <- tree(Pobre ~ . , train)
+  tree_pobre
+  summary(tree_pobre)
+  #We see that the training error rate is x%. The Misclassification error rate
+  # A small deviance indicates a tree that provides a good fit to the (training) data.
+  
+  plot(tree_pobre)
+  text(tree_pobre, pretty = 0)
+  
+  ### Evaluating the performance
+  set.seed(2)
+  train_2 <- sample(1:nrow(train), 200)
+  test_2 <- train[-train_2, ]
+  tree_pobre_prueba <- tree(Pobre ~ . , train,
+                        subset = train_2)
+  tree_pred_prueba <- predict(tree_pobre_prueba, test_2,
+                       type = "class")
+  table(tree_pred_prueba, test_2)
+  
+  #
+  set.seed(7)
+  cv.pobre <- cv.tree(tree_pred_prueba, FUN = prune.misclass)
+  
+  par(mfrow = c(1, 2))
+  plot(cv.pobre$Pobre, cv.pobre$dev, type = "b")
+  ### Falta
+}
+
+#### Bagging ----
+{
+  library(randomForest)
+  
+  train_2 <- sample(1:nrow(train), nrow(train) / 2)
+  pobre_test <- train[-train_2, "Pobre"]
+  
+  set.seed(1)
+  # configurar el mtry=12 que hace referencia a los predictores 
+  # ntree = 25 - podemos complejizar el modelo 
+  bag_pobre <- randomForest(Pobre ~ ., data = train,
+                             subset = train_2, mtry = 12, importance = TRUE)
+  bag_pobre
+  
+  yhat_bag <- predict(bag_pobre, newdata = train[-train_2, ])
+  plot(yhat_bag, pobre_test)
+  abline(0, 1)
+  
+  mean((yhat_bag - pobre_test)^2)
+}
+
+#### Random Forest ----
+{
+  library(randomForest)
+  
+  train_2 <- sample(1:nrow(train), nrow(train) / 2)
+  pobre_test <- train[-train_2, "Pobre"]
+  
+  
+  set.seed(1)
+  # configurar el mtry=12 In this case must be the square of the number of variables
+  # ntree = 25 - podemos complejizar el modelo 
+  rf_pobre <- randomForest(Pobre ~ ., data = train,
+                           subset = train_2, mtry = 6, importance = TRUE)
+  yhat_rf <- predict(rf_pobre, newdata = train[-train_2, ])
+  mean((yhat_rf - pobre_test)^2)
+  
+  plot(yhat_rf, pobre_test)
+  abline(0, 1)
+  
+  mean((yhat_rf - pobre_test)^2)
+  
+  # we can view the importance of each variable.
+  importance(rf_pobre)
+  # The same, but in a diagram
+  varImpPlot(rf.boston)
+}
+
+# Voy en Boosting
+
+
+
+
