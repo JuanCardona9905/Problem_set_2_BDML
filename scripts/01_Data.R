@@ -209,8 +209,9 @@ pre_process_hogares <- function(data,...){
       Cabecera = ifelse(Clase==1,1,0), 
       DormitorXpersona = P5010/Nper,
       P5140 = ifelse(is.na(P5140),P5130,P5140), #si no paga arriendo pone el valor que pagaria
+      Ln_Cuota = log(P5100),#Log de pago de cuota
+      Ln_Cuota = ifelse(is.na(Ln_Cuota),0,Ln_Cuota), #pone 0 en NA
       P5100 = ifelse(is.na(P5100),0,P5100), #pone 0 en NA (valor cuota)
-      Ln_Cuota = log(P5100), #Log de pago de cuota
       #Ln_Est_arrien = log(P5130), #Log de pago de estimativo de pago de arriendo
       Ln_Pago_arrien = log(P5140)) %>% #Log de pago arriendo 
     
