@@ -105,6 +105,8 @@ pre_process_personas <- function(data,...){
       Menor_5 = ifelse(P6040<6,1,0), # Menores de 5 años
       Menor_6_11 = ifelse(P6040>5 & P6040<12,1,0), # Menores entre 6 y 11 años
       Menor_12_17 = ifelse(P6040>11 & P6040<18,1,0), # Menores entre 12 y 17 años
+      Trabajo_menores = ifelse(P6040<18&Oc==1,1,0), # Menores que trabajan 
+      incapacitado = ifelse(P6240==5,1,0),
       EducLevel = ifelse(P6210==9,0,P6210), #Replace 9 with 0
       ocupado = ifelse(is.na(Oc),0,1),
       exper_ult_trab = ifelse(is.na(P6426),0,P6426),
@@ -119,16 +121,22 @@ pre_process_personas <- function(data,...){
       #Ing_extra = P7500s1a1+P7500s3a1+P7510s1a1+P7510s2a1+P7510s5a1,
       Rec_subsidio = ifelse(P7510s3==1,1,0),
       Rec_subsidio = ifelse(is.na(Rec_subsidio),0,Rec_subsidio),
-      P6870 = ifelse(is.na(P6870),0,P6870))%>% #pone 0 en NA para nivel de formalidad
-      #Ln_Ingtot = log(Ingtot),
+      Primas = ifelse(is.na(P6545),0,P6545), #pone 0 en NA para primas
+      Bonificaciones = ifelse(is.na(P6580),0,P6580), #pone 0 en NA para bonificaciones
+      Nivel_formalidad = ifelse(is.na(P6870),0,P6870),
+      Segundo_trabajo = ifelse(P7040==1,1,0), #dummy si tiene segundo trabajo
+      Segundo_trabajo = ifelse(is.na(P7040),0,P7040),
+      Ocupacion = ifelse(is.na(P6430),P7350,P6430),#pone la ocupacion de su ultimo trabajo si tiene NA
+      Ocupacion = ifelse(is.na(P6430),0,P6430), #0 para desocupados
+      Oficio = ifelse(is.na(Oficio),0,Oficio))%>% #0 para desocupados
+  
+    #Ln_Ingtot = log(Ingtot),
       #Ln_Ingtotob = log(Ingtotob),
       #Ln_Ing_extra = log(Ing_extra))
     
     #modificar nombres
     rename(
-      Edad = P6040,
-      Ocupacion = P6430,
-      Nivel_formalidad = P6870)
+      Edad = P6040)
     }  
 }  
 
@@ -143,8 +151,10 @@ personas_nivel_hogar <- function(data,...){
               nmenores_5=sum(Menor_5,na.rm=TRUE),
               nmenores_6_11=sum(Menor_6_11,na.rm=TRUE),
               nmenores_12_17=sum(Menor_12_17,na.rm=TRUE),
+              ntrabajo_menores=sum(Trabajo_menores,na.rm = T),
               maxEducLevel=max(EducLevel,na.rm=TRUE),
-              nocupados=sum(ocupado,na.rm=TRUE))
+              nocupados=sum(ocupado,na.rm=TRUE),
+              nincapacitados=sum(incapacitado,na.rm = T))
 }
 
 train_personas_hogar <- personas_nivel_hogar(train_personas)
@@ -154,7 +164,8 @@ test_personas_hogar <- personas_nivel_hogar(test_personas)
 personas_jefe_hogar <- function(data,...){
    data <- data %>% 
       filter(H_Head==1) %>% 
-      select(id,Mujer,EducLevel,ocupado,Afiliado_SS,Reg_subs_salud,exper_ult_trab,Rec_alimento,Rec_vivienda,Cot_pension,Rec_subsidio,Nivel_formalidad)%>% 
+      select(id,Mujer,EducLevel,ocupado,Afiliado_SS,Reg_subs_salud,exper_ult_trab,Rec_alimento,
+             Rec_vivienda,Cot_pension,Rec_subsidio,Nivel_formalidad,Oficio,Ocupacion,Primas,Bonificaciones,Segundo_trabajo)%>% 
       rename(Head_Mujer=Mujer,
              Head_EducLevel=EducLevel,
              Head_ocupado=ocupado,
@@ -165,11 +176,17 @@ personas_jefe_hogar <- function(data,...){
              Head_Rec_vivienda=Rec_vivienda,
              Head_Cot_pension=Cot_pension,
              Head_Rec_subsidio=Rec_subsidio,
-             Head_Nivel_formalidad=Nivel_formalidad)
+             Head_Nivel_formalidad=Nivel_formalidad,
+             Head_Oficio = Oficio,
+             Head_Ocupacion = Ocupacion,
+             Head_Primas = Primas,
+             Head_Bonificaciones = Bonificaciones,
+             Head_Segundo_trabajo = Segundo_trabajo)
    }
   
 train_personas_hogar <- left_join(train_personas_hogar,personas_jefe_hogar(train_personas),by = "id")
 test_personas_hogar <- left_join(test_personas_hogar,personas_jefe_hogar(test_personas),by = "id")
+
 }
 
 ### Hogares --
@@ -185,10 +202,13 @@ pre_process_hogares <- function(data,...){
       #modificar variables
       mutate(
       Dominio=factor(Dominio),
+      Head_Oficio=factor(Head_Oficio),
+      Head_Ocupacion=factor(Head_Ocupacion),
+      Head_EducLevel = factor(Head_EducLevel,levels=c(0:6), labels=c("Ns",'Ninguno', 'Preescolar','Primaria', 'Secundaria','Media', 'Universitaria')),
       maxEducLevel=factor(maxEducLevel,levels=c(0:6), labels=c("Ns",'Ninguno', 'Preescolar','Primaria', 'Secundaria','Media', 'Universitaria')),
       Cabecera = ifelse(Clase==1,1,0), 
       DormitorXpersona = P5010/Nper,
-      P5140 = ifelse(is.na(P5140),P5130,P5140), #pone valores de pago estimado de arriendo a NA 
+      P5140 = ifelse(is.na(P5140),P5130,P5140), #si no paga arriendo pone el valor que pagaria
       P5100 = ifelse(is.na(P5100),0,P5100), #pone 0 en NA (valor cuota)
       Ln_Cuota = log(P5100), #Log de pago de cuota
       #Ln_Est_arrien = log(P5130), #Log de pago de estimativo de pago de arriendo
@@ -222,16 +242,18 @@ table(train_hogares$Pobre)[2]/nrow(train_hogares)
 # En la muestra hay 33.024 personas en condicion de pobreza
 # lo que representa el 20% de la muestra.
 
-#### 5. Missing ----
+{#### 5. Missing ----
 miss_var_summary(train_hogares) #sin missings
+miss_var_summary(test_hogares) #sin missings
+}
 
-#### 6. Guardar nueva base de datos --
+{#### 6. Guardar nueva base de datos --
 rm(list = c("test_personas_hogar","train_personas_hogar",
             "personas_jefe_hogar","personas_nivel_hogar",
             "pre_process_hogares","pre_process_personas"))
 
 save.image("base_final.RData")
-
+}
 # Personas - BORRARRRRRRRRR
 
 ## Estuve molestando con el pago de arriendo y la discontinuidad en pobreza
