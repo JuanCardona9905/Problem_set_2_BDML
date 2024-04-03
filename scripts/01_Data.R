@@ -204,6 +204,7 @@ pre_process_hogares <- function(data,...){
       Dominio=factor(Dominio),
       Head_Oficio=factor(Head_Oficio),
       Head_Ocupacion=factor(Head_Ocupacion),
+      P5090=factor(P5090), #factor de ocupacion vivienda
       Head_EducLevel = factor(Head_EducLevel,levels=c(0:6), labels=c("Ns",'Ninguno', 'Preescolar','Primaria', 'Secundaria','Media', 'Universitaria')),
       maxEducLevel=factor(maxEducLevel,levels=c(0:6), labels=c("Ns",'Ninguno', 'Preescolar','Primaria', 'Secundaria','Media', 'Universitaria')),
       Cabecera = ifelse(Clase==1,1,0), 
