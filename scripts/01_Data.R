@@ -130,7 +130,7 @@ pre_process_personas <- function(data,...){
       Ocupacion = ifelse(is.na(P6430),0,P6430), #0 para desocupados
       Oficio = ifelse(is.na(Oficio),0,Oficio))%>% #0 para desocupados
   
-    #Ln_Ingtot = log(Ingtot),
+      #Ln_Ingtot = log(Ingtot),
       #Ln_Ingtotob = log(Ingtotob),
       #Ln_Ing_extra = log(Ing_extra))
     
@@ -204,7 +204,7 @@ pre_process_hogares <- function(data,...){
       Dominio=factor(Dominio),
       Head_Oficio=factor(Head_Oficio),
       Head_Ocupacion=factor(Head_Ocupacion),
-      P5090=factor(P5090), #factor de ocupacion vivienda
+      P5090=factor(P5090), #factor de ocupacion de vivienda
       Head_EducLevel = factor(Head_EducLevel,levels=c(0:6), labels=c("Ns",'Ninguno', 'Preescolar','Primaria', 'Secundaria','Media', 'Universitaria')),
       maxEducLevel=factor(maxEducLevel,levels=c(0:6), labels=c("Ns",'Ninguno', 'Preescolar','Primaria', 'Secundaria','Media', 'Universitaria')),
       Cabecera = ifelse(Clase==1,1,0), 
