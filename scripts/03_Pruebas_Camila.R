@@ -7,7 +7,9 @@ p_load("tidyverse",
        "caret",
        "smotefamily",
        "dplyr",
-       "dummy")
+       "dummy",
+       "MLeval",
+       "pROC") #*MLeval: Machine Learning Model Evaluation
 
 setwd("/Users/camilabeltran/OneDrive/Educación/PEG - UniAndes/BDML/Problem_set_2_BDML/Data")
 load("base_final.RData")
@@ -17,7 +19,6 @@ colnames(train_hogares)
 #variables: train_hogares <- train_hogares %>% #seleccionar variables
 #       select(Dominio, Ocup_vivienda, Nper, maxEducLevel, nocupados, nincapacitados,
 #       Cabecera, DormitorXpersona, Head_Mujer, ntrabajo_menores, Pobre)
-
 {
 train_hogares <- train_hogares %>% #seleccionar variables
   select(Dominio, Ocup_vivienda, Nper, maxEducLevel, nocupados, nincapacitados,
@@ -94,6 +95,8 @@ confusionMatrix(data = test$pobre_hat_logit_smote,
 #F1 = 0.58
 }
 
+#modelo 2 - elastic net con remuestreo SMOTE F1 = 0.66 Kaggle
+{
 #modelo 2
 train_hogares <- train_hogares %>% #seleccionar variables
          select(-id,
@@ -164,7 +167,7 @@ ctrl<- trainControl(method = "cv",
 
 model1 <- train(class~.,
                 data=smote_data,
-                metric = "F1",
+                metric = "Accuracy",
                 method = "glmnet",
                 trControl = ctrl,
                 tuneGrid=expand.grid(
@@ -179,12 +182,15 @@ confusionMatrix(data = test$pobre_hat_model1,
                 reference = test$Pobre, positive="Yes", mode = "prec_recall")
 
 #F1 = O.66
+
+# Predicción Kaggle 1
 predictSample <- test_hogares   %>% 
-  mutate(Pobre = predict(model1, newdata = test_hogares, type = "raw")  
-  )  %>% select(id,Pobre)
+  mutate(Pobre = predict(model1, newdata = test_hogares, type = "raw"))  %>% select(id,Pobre)
 
 predictSample<- predictSample %>% 
   mutate(pobre=ifelse(Pobre=="Yes",1,0)) %>% 
   select(id,pobre)
 
 write.csv(predictSample,"classification_elasticnet_smote.csv", row.names = FALSE)
+
+}
