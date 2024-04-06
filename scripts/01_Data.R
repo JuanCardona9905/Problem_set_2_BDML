@@ -39,15 +39,15 @@ ifelse(grepl("camilabeltran", getwd()),
                      ifelse(grepl("C:/Users/User",getwd()),
                             wd <- "C:/Users/User/OneDrive - Universidad de los andes/Big Data y Machine Learning/Problem_set_1/Problem_set_1",
                             ifelse(grepl("/Users/aleja/",getwd()),
-                                   wd <- "/Users/aleja/Documents/Maestría Uniandes/Clases/Big Data y Machine Learning/Repositorios Git Hub/Problem_set_1)",
+                                   wd <- "/Users/aleja/Documents/Maestría Uniandes/Clases/Big Data y Machine Learning/Repositorios Git Hub/Problem_set_2_BDML",
                                    wd <- "otro_directorio")))))
 }
 
 #### 2. Importar bases de datos ----
 {
-### Importar las bases de entrenamiento 
+### Importar las bases de entrenamiento
 # Personas
-setwd(paste0(wd,"/data"))
+setwd(paste0(wd,"/Data"))
 load(file = "train_personas.RData")
 length(train_personas) # 135 variables 
 nrow(train_personas) # 543.109 observaciones
