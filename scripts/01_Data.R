@@ -33,7 +33,7 @@ p_load(rio, # importación/exportación de datos
 ifelse(grepl("camilabeltran", getwd()),
        wd <- "/Users/camilabeltran/OneDrive/Educación/PEG - Uniandes/BDML/Problem_set_2_BDML",
        ifelse(grepl("Juan",getwd()),
-              wd <- "C:/Users/Juan/Documents/Problem_set_2",
+              wd <- "C:/Users/Juan/Documents/Problem_set_2_BDML",
               ifelse(grepl("juanp.rodriguez",getwd()),
                      wd <- "C:/Users/juanp.rodriguez/Documents/GitHub/Problem_set_1",
                      ifelse(grepl("C:/Users/User",getwd()),
@@ -63,6 +63,8 @@ test_personas <- read_csv("test_personas.csv")
 length(test_personas) # 63 variables 
 nrow(test_personas) # 219.644 observaciones
 
+
+
 # Hogares
 test_hogares <- read_csv("test_hogares.csv")
 length(test_hogares) # 16 variables 
@@ -78,6 +80,29 @@ colnames(train_hogares)
 colnames(test_hogares)
 # Los hogares no tienen la variable Orden porque las personas estan 
 # agrupadas o colapsadas en id
+}
+
+{ # Grafica que divide a pobres
+  train_hogares_Graf <-  train_hogares %>% 
+    filter(Ingtotug < 2000000) %>% 
+    mutate(y = density(Ingtotug))
+  
+  ggplot(train_hogares_Graf, aes(x = Ingpcug)) +
+    geom_density(fill = "blue", alpha = 0.5) +
+    geom_vline(xintercept = mean(train_hogares$Lp), color = "red", linetype = "dashed") +
+    labs(x = "Ingreso", y = "Densidad") +
+    theme_minimal()
+  
+  media_ingreso <- mean(train_hogares$Lp)
+  ggplot(train_hogares_Graf, aes(x = Ingpcug)) +
+    geom_histogram(data = subset(train_hogares_Graf, Ingpcug < media_ingreso), fill = "red", bins = 40) +
+    geom_histogram(data = subset(train_hogares_Graf, Ingpcug >= media_ingreso), fill = "blue", bins = 40) +
+    geom_vline(aes(xintercept = media_ingreso), color = "green", linetype = "dashed", size = 1) +
+    theme_minimal() +
+    labs(title = "Distribución del Ingreso",
+         subtitle = "Observaciones por debajo y por encima de la media",
+         x = "Ingreso",
+         y = "Frecuencia")
 }
 
 #### 3. Modificacion base de datos ----
