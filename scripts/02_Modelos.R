@@ -7,60 +7,124 @@
 #se borra la memoria
 rm(list = ls())
 #se cargan los paquetes
-library(pacman)
-p_load(rio, # importación/exportación de datos
-       tidyverse, # datos ordenados (ggplot y Tidyverse)
-       skimr, # datos de resumen
-       visdat, # visualización de datos faltantes
-       corrplot, # gráficos de correlación
-       stargazer, # tablas/salida a TEX.
-       rvest, # web-scraping
-       readxl,
-       readr, # importar Excel
-       writexl, # exportar Excel
-       boot, # bootstrapping
-       ggpubr, # extensiones de ggplot2
-       WVPlots, # gráficos de variables ponderadas
-       patchwork, # para combinar gráficos
-       gridExtra, # para combinar gráficos
-       ggplot2, # gráficos
-       caret, # para evaluación de modelos predictivos
-       glmnet, # para evaluación de modelos predictivos
-       data.table, # para manipulación de datos
-       MASS, # El paquete tiene a la funcion de LDA
-       class, # El paquete tiene a la funcion de k-neighbours
-       gmodels,
-       tree,
-       naniar) # missing
+#library(pacman)
+# p_load(rio, # importación/exportación de datos
+#        tidyverse, # datos ordenados (ggplot y Tidyverse)
+#        skimr, # datos de resumen
+#        visdat, # visualización de datos faltantes
+#        corrplot, # gráficos de correlación
+#        stargazer, # tablas/salida a TEX.
+#        rvest, # web-scraping
+#        readxl,
+#        readr, # importar Excel
+#        writexl, # exportar Excel
+#        boot, # bootstrapping
+#        ggpubr, # extensiones de ggplot2
+#        WVPlots, # gráficos de variables ponderadas
+#        patchwork, # para combinar gráficos
+#        gridExtra, # para combinar gráficos
+#        ggplot2, # gráficos
+#        caret, # para evaluación de modelos predictivos
+#        glmnet, # para evaluación de modelos predictivos
+#        data.table, # para manipulación de datos
+#        class, # El paquete tiene a la funcion de k-neighbours
+#        gmodels,
+#        MASS,
+#        tree,
+#        naniar) # missing
+
+require("pacman")
+p_load("tidyverse",
+       "glmnet",
+       "caret",
+       "smotefamily",
+       "dplyr",
+       "dummy",
+       "MLeval",
+       "pROC") #*MLeval: Machine Learning Model Evaluation
+
 
 #se define la ruta de trabajo
-ifelse(grepl("camilabeltran", getwd()),
-       wd <- "/Users/camilabeltran/OneDrive/Educación/PEG - Uniandes/BDML/GitHub/problem_set/Problem_set_1",
-       ifelse(grepl("Juan",getwd()),
-              wd <- "C:/Users/Juan/Documents/Problem_set_2",
-              ifelse(grepl("juanp.rodriguez",getwd()),
-                     wd <- "C:/Users/juanp.rodriguez/Documents/GitHub/Problem_set_1",
-                     ifelse(grepl("C:/Users/User",getwd()),
-                            wd <- "C:/Users/User/OneDrive - Universidad de los andes/Big Data y Machine Learning/Problem_set_1/Problem_set_1",
-                            ifelse(grepl("/Users/aleja/",getwd()),
-                                   wd <- "/Users/aleja/Documents/Maestría Uniandes/Clases/Big Data y Machine Learning/Repositorios Git Hub/Problem_set_1)",
-                                   wd <- "otro_directorio")))))
 
-#Script: "01_web_scraping.R". Realiza el proceso de web scraping para conseguir los datos
-setwd(paste0(wd,"/scripts"))
+setwd("C:/Users/Juan/Documents/Problem_set_2_BDML/Data")
+
+
+load("base_final.RData")
+colnames(train_hogares) 
 }
 
-#### 2. Importar bases de datos ----
-{
-### Importar las bases de datos finales 
-# Train
-
-# Test
+#### 2. Selección de variables
+{ #Train
+  train_hogares <- train_hogares %>% #seleccionar variables
+    dplyr::select(-id,
+           -Clase, #ya esta cabecera
+           -P5010, #¿en cuántos de esos cuartos duermen las personas de este hogar?
+           -P5100,#cuando paga por amort (ya esta con ln(cuota)
+           -P5140,#arriendo ya esta con ln,
+           -Npersug, #no. personas unidad gasto,
+           -Ingtotug,
+           -Ingtotugarr,
+           -Li,
+           -Lp,
+           -Ingpcug,
+           -Ln_Ing_tot_hogar_imp_arr,
+           -Ln_Ing_tot_hogar_per_cap,
+           -Ln_Ing_tot_hogar,
+           -Fex_c)
+  
+  dummys <- dummy(subset(train_hogares, select = c(Dominio, Depto, Ocup_vivienda, maxEducLevel, 
+                                                   Head_EducLevel, Head_Oficio, Head_Ocupacion)))
+  dummys <- as.data.frame(apply(dummys,2,function(x){as.numeric(x)}))
+  
+  train_hogares <- cbind(subset(train_hogares, select = -c(Dominio, Depto, Ocup_vivienda, maxEducLevel, 
+                                                           Head_EducLevel, Head_Oficio, Head_Ocupacion)),dummys)
   
 }
 
+{ # Test
+  test_hogares <- test_hogares %>% #seleccionar variables
+    dplyr::select(-Clase, #ya esta cabecera
+           -P5010, #¿en cuántos de esos cuartos duermen las personas de este hogar?
+           -P5100,#cuando paga por amort (ya esta con ln(cuota)
+           -P5140,#arriendo ya esta con ln,
+           -Li,
+           -Lp,
+           -Npersug, #no. personas unidad gasto,
+           -Fex_c)
+  
+  dummys <- dummy(subset(test_hogares, select = c(Dominio, Depto, Ocup_vivienda, maxEducLevel, 
+                                                  Head_EducLevel, Head_Oficio, Head_Ocupacion)))
+  dummys <- as.data.frame(apply(dummys,2,function(x){as.numeric(x)}))
+  
+  test_hogares <- cbind(subset(test_hogares, select = -c(Dominio, Depto, Ocup_vivienda, maxEducLevel, 
+                                                         Head_EducLevel, Head_Oficio, Head_Ocupacion)),dummys)
+  #dejar variables que comparten test y train depsues de crear dummys
+  train_hogares <- train_hogares[c(colnames(test_hogares)[2:ncol(test_hogares)],"Pobre")]
+  
+}
 
-#### 3. Modelos ----
+#### 3. Imbalances ----
+prop.table(table(train_hogares$Pobre))
+
+# Dividir los datos en conjuntos de entrenamiento (train) y prueba (test)
+set.seed(6392) # Para reproducibilidad
+train_indices <- as.integer(createDataPartition(train_hogares$Pobre, p = 0.8, list = FALSE))
+train <- train_hogares[train_indices, ]
+test <- train_hogares[-train_indices, ]
+prop.table(table(train$Pobre))
+prop.table(table(test$Pobre))
+
+predictors <- colnames(train  %>% dplyr::select(-Pobre))
+smote_output <- SMOTE(X = train[predictors],
+                      target = train$Pobre)
+smote_data <- smote_output$data
+
+table(train$Pobre)
+table(smote_data$class)
+
+
+
+#### 4. Modelos ----
 
 ### Logistic Regression --
 
@@ -98,25 +162,73 @@ Mod_1_LR_pred <- ifelse(Mod_1_LR_prob>0.5, "Pobre", "No Pobre")
 
 ### Modelo 2 -
 {
+{
   ## Entrenamiento
   
   # Modelo
+  library(MASS)
   Mod_2_LDA <- lda(formula = Pobre ~., 
                   data = train)
   Mod_2_LDA
   plot(Mod_2_LDA)
 
-  # Prediccion in-sample
-  Mod_2_LDA_pred <- predict(Mod_2_LDA, train)
-  
-  # Matriz de confusion
-  table(Mod_2_LDA_pred, train$Pobre) #aca se puede ajustar el umbral
-  mean(Mod_1_LR_pred == train$Pobre)
-  
   # Prediccion out-sample
   Mod_2_LDA_pred <- predict(Mod_2_LDA, test)
-  # Borrar Creo que toca con data.frame...
+  names(Mod_2_LDA_pred)
+  Mod_2_LDA_pred.class <- Mod_2_LDA_pred$class
+  
+  # Matriz de confusion
+  table(Mod_2_LDA_pred.class, test$Pobre) #aca se puede ajustar el umbral
+  mean(Mod_2_LDA_pred.class == test$Pobre)
+  
+  confusionMatrix(data = Mod_2_LDA_pred.class, 
+                  reference = test$Pobre, positive="Yes", mode = "prec_recall")
+  #F1 = 0.51
+  
 }
+## Desde acá
+#remuestreo hibrido
+##smote approach
+set.seed(6392)
+
+Mod_2_LDA_smote <- lda(formula = class ~., 
+                 data = smote_data)
+Mod_2_LDA_smote
+plot(Mod_2_LDA_smote)
+
+# Prediccion out-sample
+Mod_2_LDA_pred_smote <-  predict(Mod_2_LDA_smote,newdata = test,
+                                                      type = "raw")
+names(Mod_2_LDA_pred_smote)
+head(Mod_2_LDA_pred_smote)
+Mod_2_LDA_pred_smote.class <- Mod_2_LDA_pred_smote$class
+
+
+# Matriz de confusion
+table(Mod_2_LDA_pred_smote.class, test$Pobre) #aca se puede ajustar el umbral
+mean(Mod_2_LDA_pred_smote.class == test$Pobre)
+
+
+confusionMatrix(data = Mod_2_LDA_pred_smote.class, 
+                reference = test$Pobre, positive="Yes", mode = "prec_recall")
+#F1 = 0.65
+
+
+
+# Predicción Modelo 2 con Smote
+library(stats)
+predictSample <- test_hogares   %>% 
+  dplyr::mutate(Pobre = predict(Mod_2_LDA_smote, newdata = test_hogares, type = "raw")$class)  %>% 
+  dplyr::select(id,Pobre)
+
+predictSample<- predictSample %>% 
+  dplyr::mutate(pobre=ifelse(Pobre=="Yes",1,0)) %>% 
+  dplyr::select(id,pobre)
+
+write.csv(predictSample,"classification_Lin_Disc_Analysis_smote.csv", row.names = FALSE)
+
+}
+
 
 ### K-nearest Neighbour Classification --
 
