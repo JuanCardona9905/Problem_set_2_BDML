@@ -668,6 +668,7 @@ train_hogares <- train_hogares %>%
 
 #random forest con cross-validation 2 (todas variables)
 {
+  load("base_final.RData")
   train_hogares <- train_hogares %>% #seleccionar variables
     select(-id,
            -Clase, #ya esta cabecera
@@ -695,21 +696,45 @@ train_hogares <- train_hogares %>%
            -Npersug, #no. personas unidad gasto,
            -Fex_c)
   
-  test_hogares <- test_hogares %>% 
+  train_hogares <- train_hogares %>% 
     mutate(
       Head_Mujer <- factor(Head_Mujer),
       Depto <- factor(Depto),
-      Head_Ocupado <- factor(Head_Ocupado),
+      Head_ocupado <- factor(Head_ocupado),
       Head_Reg_subs_salud <- factor(Head_Reg_subs_salud),
       Head_Afiliado_SS <- factor(Head_Afiliado_SS),
-      Head_exper_ult_trab <- factor(Head_exper_ult_trab),
       Head_Rec_alimento <- factor(Head_Rec_alimento),
       Head_Rec_subsidio <- factor(Head_Rec_subsidio),
       Head_Cot_pension <- factor(Head_Cot_pension),
       Head_Rec_vivienda <- factor(Head_Rec_vivienda),
       Head_Ocupacion <- factor(Head_Ocupacion),
       Head_Segundo_trabajo <- factor(Head_Segundo_trabajo),
-      Head_Nivel_formalidad <- factor(Head_Nivel_formalidad))  
+      Head_Nivel_formalidad <- factor(Head_Nivel_formalidad),
+      Head_Oficio <- factor(Head_Oficio),
+      Head_Primas <- factor(Head_Primas),
+      Head_Bonificaciones <- factor(Head_Bonificaciones),
+      Head_Segundo_trabajo <- factor(Head_Segundo_trabajo),
+      Cabecera <- factor(Cabecera))  
+  
+  test_hogares <- test_hogares %>% 
+    mutate(
+      Head_Mujer <- factor(Head_Mujer),
+      Depto <- factor(Depto),
+      Head_ocupado <- factor(Head_ocupado),
+      Head_Reg_subs_salud <- factor(Head_Reg_subs_salud),
+      Head_Afiliado_SS <- factor(Head_Afiliado_SS),
+      Head_Rec_alimento <- factor(Head_Rec_alimento),
+      Head_Rec_subsidio <- factor(Head_Rec_subsidio),
+      Head_Cot_pension <- factor(Head_Cot_pension),
+      Head_Rec_vivienda <- factor(Head_Rec_vivienda),
+      Head_Ocupacion <- factor(Head_Ocupacion),
+      Head_Segundo_trabajo <- factor(Head_Segundo_trabajo),
+      Head_Nivel_formalidad <- factor(Head_Nivel_formalidad),
+      Head_Oficio <- factor(Head_Oficio),
+      Head_Primas <- factor(Head_Primas),
+      Head_Bonificaciones <- factor(Head_Bonificaciones),
+      Head_Segundo_trabajo <- factor(Head_Segundo_trabajo),
+      Cabecera <- factor(Cabecera))  
   
   fiveStats <- function(...) c(twoClassSummary(...), defaultSummary(...))
   ctrl<- trainControl(method = "cv",
@@ -719,16 +744,12 @@ train_hogares <- train_hogares %>%
                       verbose=FALSE,
                       savePredictions = T)
   
-  mtry_grid<-expand.grid(mtry =c(5,10,20), # 8 inclueye bagging
-                         min.node.size= c(100,200,300), #controla la complejidad del arbol
+  mtry_grid<-expand.grid(mtry =c(10,15,30), # 8 inclueye bagging
+                         min.node.size= c(25,50,100), #controla la complejidad del arbol
                          splitrule= 'gini') #splitrule fija en gini. 
   mtry_grid
   
-  cv_RForest <- train(Pobre~Dominio+Depto+N_cuartos_hog+Nper+nmenores_5
-                      +nmenores_6_11+nmenores_12_17+nocupados+nincapacitados+ntrabajo_menores+
-                        Head_Mujer+Head_Afiliado_SS+Head_exper_ult_trab+Head_Rec_alimento+
-                        Head_Rec_subsidio+Head_Rec_vivienda+Head_Ocupacion+Head_Segundo_trabajo+
-                        DormitorXpersona+Ln_Cuota+Ln_Pago_arrien, 
+  cv_RForest <- train(Pobre~., 
                       data = train_hogares, 
                       method = "ranger",
                       trControl = ctrl,
@@ -746,10 +767,8 @@ train_hogares <- train_hogares %>%
     mutate(pobre=ifelse(Pobre=="Yes",1,0)) %>% 
     select(id,pobre)
   
-  write.csv(predictSample,"classification_random_forest1.csv", row.names = FALSE)
+  write.csv(predictSample,"classification_random_forest2.csv", row.names = FALSE)
   
   #aucval_rf <- Metrics::auc(actual = Pobre,predicted =rf_pred[,2])
   #aucval_rf
-  
-  
 }

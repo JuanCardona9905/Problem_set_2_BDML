@@ -63,8 +63,6 @@ test_personas <- read_csv("test_personas.csv")
 length(test_personas) # 63 variables 
 nrow(test_personas) # 219.644 observaciones
 
-
-
 # Hogares
 test_hogares <- read_csv("test_hogares.csv")
 length(test_hogares) # 16 variables 
@@ -146,11 +144,13 @@ pre_process_personas <- function(data,...){
       #Ing_extra = P7500s1a1+P7500s3a1+P7510s1a1+P7510s2a1+P7510s5a1,
       Rec_subsidio = ifelse(P7510s3==1,1,0),
       Rec_subsidio = ifelse(is.na(Rec_subsidio),0,Rec_subsidio),
-      Primas = ifelse(is.na(P6545),0,P6545), #pone 0 en NA para primas
-      Bonificaciones = ifelse(is.na(P6580),0,P6580), #pone 0 en NA para bonificaciones
+      Primas = ifelse(P6545==1,1,0), #dummy de primas
+      Primas = ifelse(is.na(Primas),0,Primas), #pone 0 en NA para primas
+      Bonificaciones = ifelse(P6580==1,1,0), #dummy de bonificaciones
+      Bonificaciones = ifelse(is.na(Bonificaciones),0,Bonificaciones), #pone 0 en NA para bonificaciones
       Nivel_formalidad = ifelse(is.na(P6870),0,P6870),
       Segundo_trabajo = ifelse(P7040==1,1,0), #dummy si tiene segundo trabajo
-      Segundo_trabajo = ifelse(is.na(P7040),0,P7040),
+      Segundo_trabajo = ifelse(is.na(Segundo_trabajo),0,Segundo_trabajo),
       Ocupacion = ifelse(is.na(P6430),P7350,P6430),#pone la ocupacion de su ultimo trabajo si tiene NA
       Ocupacion = ifelse(is.na(P6430),0,P6430), #0 para desocupados
       Oficio = ifelse(is.na(Oficio),0,Oficio))%>% #0 para desocupados
