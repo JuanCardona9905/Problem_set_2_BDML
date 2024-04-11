@@ -773,7 +773,8 @@ train_hogares <- train_hogares %>%
   #aucval_rf
 }
 
-#random forest con cv 3, todas variables y SMOTE
+#random forest con cv 3, todas variables y SMOTE 
+#Kaggle puntaje = 0.63
 {
   load("base_final.RData")
   train_hogares <- train_hogares %>% #seleccionar variables
@@ -876,5 +877,6 @@ train_hogares <- train_hogares %>%
     mutate(pobre=ifelse(Pobre=="Yes",1,0)) %>% 
     select(id,pobre)
   
+  #Kaggle puntaje = 0.63
   write.csv(predictSample,"classification_random_forest3.csv", row.names = FALSE)
 }
