@@ -772,3 +772,109 @@ train_hogares <- train_hogares %>%
   #aucval_rf <- Metrics::auc(actual = Pobre,predicted =rf_pred[,2])
   #aucval_rf
 }
+
+#random forest con cv 3, todas variables y SMOTE
+{
+  load("base_final.RData")
+  train_hogares <- train_hogares %>% #seleccionar variables
+    select(-id,
+           -Clase, #ya esta cabecera
+           -P5010, #¿en cuántos de esos cuartos duermen las personas de este hogar?
+           -P5100,#cuando paga por amort (ya esta con ln(cuota)
+           -P5140,#arriendo ya esta con ln,
+           -Npersug, #no. personas unidad gasto,
+           -Ingtotug,
+           -Ingtotugarr,
+           -Li,
+           -Lp,
+           -Ingpcug,
+           -Ln_Ing_tot_hogar_imp_arr,
+           -Ln_Ing_tot_hogar_per_cap,
+           -Ln_Ing_tot_hogar,
+           -Fex_c)
+  
+  test_hogares <- test_hogares %>% #seleccionar variables
+    select(-Clase, #ya esta cabecera
+           -P5010, #¿en cuántos de esos cuartos duermen las personas de este hogar?
+           -P5100,#cuando paga por amort (ya esta con ln(cuota)
+           -P5140,#arriendo ya esta con ln,
+           -Li,
+           -Lp,
+           -Npersug, #no. personas unidad gasto,
+           -Fex_c)
+
+  dummys <- dummy(subset(train_hogares, select = c(Dominio, Depto, Ocup_vivienda, maxEducLevel, 
+                                                   Head_EducLevel, Head_Oficio, Head_Ocupacion)))
+  dummys <- as.data.frame(apply(dummys,2,function(x){as.numeric(x)}))
+  
+  train_hogares <- cbind(subset(train_hogares, select = -c(Dominio, Depto, Ocup_vivienda, maxEducLevel, 
+                                                           Head_EducLevel, Head_Oficio, Head_Ocupacion)),dummys)
+  
+  dummys <- dummy(subset(test_hogares, select = c(Dominio, Depto, Ocup_vivienda, maxEducLevel, 
+                                                  Head_EducLevel, Head_Oficio, Head_Ocupacion)))
+  dummys <- as.data.frame(apply(dummys,2,function(x){as.numeric(x)}))
+  
+  test_hogares <- cbind(subset(test_hogares, select = -c(Dominio, Depto, Ocup_vivienda, maxEducLevel, 
+                                                         Head_EducLevel, Head_Oficio, Head_Ocupacion)),dummys)
+  
+  #dejar variables que comparten test y train despues de crear dummys
+  train_hogares <- train_hogares[c(colnames(test_hogares)[2:ncol(test_hogares)],"Pobre")]
+  
+  #dejar variables que comparten test y train despues de crear dummys
+  train_hogares <- train_hogares[c(colnames(test_hogares)[2:ncol(test_hogares)],"Pobre")]
+  
+  # Dividir los datos en conjuntos de entrenamiento (train) y prueba (test)
+  set.seed(6392) # Para reproducibilidad
+  train_indices <- as.integer(createDataPartition(train_hogares$Pobre, p = 0.8, list = FALSE))
+  train <- train_hogares[train_indices, ]
+  test <- train_hogares[-train_indices, ]
+  prop.table(table(train$Pobre))
+  prop.table(table(test$Pobre))
+  
+  predictors <- colnames(train  %>% select(-Pobre))
+  smote_output <- SMOTE(X = train[predictors],
+                        target = train$Pobre)
+  smote_data <- smote_output$data
+  
+  table(train$Pobre)
+  table(smote_data$class)
+  
+  fiveStats <- function(...) c(twoClassSummary(...), defaultSummary(...))
+  ctrl<- trainControl(method = "cv",
+                      number = 5,
+                      summaryFunction = fiveStats,
+                      classProbs = TRUE,
+                      verbose=FALSE,
+                      savePredictions = T)
+  
+  mtry_grid<-expand.grid(mtry =c(10,30,50,100), # 8 inclueye bagging
+                         min.node.size= c(50,100,200), #controla la complejidad del arbol
+                         splitrule= 'gini') #splitrule fija en gini. 
+  
+  model1 <- train(class~., 
+                      data = smote_data, 
+                      method = "ranger",
+                      trControl = ctrl,
+                      metric="ROC",
+                      tuneGrid = mtry_grid,
+                      ntree=500)
+  
+  model1
+  model1$finalModel
+  
+  test<- test  %>% mutate(pobre_hat_model1=predict(model1,newdata = test,
+                                                   type = "raw"))
+  confusionMatrix(data = test$pobre_hat_model1, 
+                  reference = test$Pobre, positive="Yes", mode = "prec_recall")
+  
+  #F1 = O.65
+  
+  predictSample <- test_hogares   %>% 
+    mutate(Pobre = predict(model1, newdata = test_hogares, type = "raw"))  %>% select(id,Pobre)
+  
+  predictSample<- predictSample %>% 
+    mutate(pobre=ifelse(Pobre=="Yes",1,0)) %>% 
+    select(id,pobre)
+  
+  write.csv(predictSample,"classification_random_forest3.csv", row.names = FALSE)
+}
