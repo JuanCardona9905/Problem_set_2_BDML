@@ -12,7 +12,8 @@ p_load("tidyverse",
        "MLeval",#*MLeval: Machine Learning Model Evaluation
        "pROC",
        "ROSE",#remuestreo ROSE
-       "ranger") #random forest 
+       "ranger", #random forest
+       "xgboost") #xgboosting  
 
 setwd("/Users/camilabeltran/OneDrive/Educación/PEG - UniAndes/BDML/Problem_set_2_BDML/Data")
 load("base_final.RData")
@@ -879,4 +880,107 @@ train_hogares <- train_hogares %>%
   
   #Kaggle puntaje = 0.63
   write.csv(predictSample,"classification_random_forest3.csv", row.names = FALSE)
+}
+
+#xgboosting con , todas variables y SMOTE 
+#Kaggle puntaje = 0.63
+{
+  load("base_final.RData")
+  train_hogares <- train_hogares %>% #seleccionar variables
+    select(-id,
+           -Clase, #ya esta cabecera
+           -P5010, #¿en cuántos de esos cuartos duermen las personas de este hogar?
+           -P5100,#cuando paga por amort (ya esta con ln(cuota)
+           -P5140,#arriendo ya esta con ln,
+           -Npersug, #no. personas unidad gasto,
+           -Ingtotug,
+           -Ingtotugarr,
+           -Li,
+           -Lp,
+           -Ingpcug,
+           -Ln_Ing_tot_hogar_imp_arr,
+           -Ln_Ing_tot_hogar_per_cap,
+           -Ln_Ing_tot_hogar,
+           -Fex_c)
+  
+  test_hogares <- test_hogares %>% #seleccionar variables
+    select(-Clase, #ya esta cabecera
+           -P5010, #¿en cuántos de esos cuartos duermen las personas de este hogar?
+           -P5100,#cuando paga por amort (ya esta con ln(cuota)
+           -P5140,#arriendo ya esta con ln,
+           -Li,
+           -Lp,
+           -Npersug, #no. personas unidad gasto,
+           -Fex_c)
+  
+  dummys <- dummy(subset(train_hogares, select = c(Dominio, Depto, Ocup_vivienda, maxEducLevel, 
+                                                   Head_EducLevel, Head_Oficio, Head_Ocupacion)))
+  dummys <- as.data.frame(apply(dummys,2,function(x){as.numeric(x)}))
+  
+  train_hogares <- cbind(subset(train_hogares, select = -c(Dominio, Depto, Ocup_vivienda, maxEducLevel, 
+                                                           Head_EducLevel, Head_Oficio, Head_Ocupacion)),dummys)
+  
+  dummys <- dummy(subset(test_hogares, select = c(Dominio, Depto, Ocup_vivienda, maxEducLevel, 
+                                                  Head_EducLevel, Head_Oficio, Head_Ocupacion)))
+  dummys <- as.data.frame(apply(dummys,2,function(x){as.numeric(x)}))
+  
+  test_hogares <- cbind(subset(test_hogares, select = -c(Dominio, Depto, Ocup_vivienda, maxEducLevel, 
+                                                         Head_EducLevel, Head_Oficio, Head_Ocupacion)),dummys)
+  
+  #dejar variables que comparten test y train despues de crear dummys
+  train_hogares <- train_hogares[c(colnames(test_hogares)[2:ncol(test_hogares)],"Pobre")]
+  
+  #dejar variables que comparten test y train despues de crear dummys
+  train_hogares <- train_hogares[c(colnames(test_hogares)[2:ncol(test_hogares)],"Pobre")]
+  
+  # Dividir los datos en conjuntos de entrenamiento (train) y prueba (test)
+  set.seed(6392) # Para reproducibilidad
+  train_indices <- as.integer(createDataPartition(train_hogares$Pobre, p = 0.8, list = FALSE))
+  train <- train_hogares[train_indices, ]
+  test <- train_hogares[-train_indices, ]
+  prop.table(table(train$Pobre))
+  prop.table(table(test$Pobre))
+  
+  predictors <- colnames(train  %>% select(-Pobre))
+  smote_output <- SMOTE(X = train[predictors],
+                        target = train$Pobre)
+  smote_data <- smote_output$data
+  
+  table(train$Pobre)
+  table(smote_data$class)
+  
+  fitControl<-trainControl(method ="cv",
+                           number=5)
+  
+  grid_xbgoost <- expand.grid(nrounds = c(500),
+                              max_depth = c(4), 
+                              eta = c(0.01,0.25,0.5), 
+                              gamma = c(0), 
+                              min_child_weight = c(50),
+                              colsample_bytree = c(0.33,0.66),
+                              subsample = c(0.4))
+  set.seed(6392)
+  model1 <- train(class~.,
+                  data=smote_data,
+                  method = "xgbTree", 
+                  trControl = fitControl,
+                  tuneGrid=grid_xbgoost)        
+  model1
+  
+  test<- test  %>% mutate(pobre_hat_model1=predict(model1,newdata = test,
+                                                   type = "raw"))
+  confusionMatrix(data = test$pobre_hat_model1, 
+                  reference = test$Pobre, positive="Yes", mode = "prec_recall")
+  
+  #F1 = O.65
+  
+  predictSample <- test_hogares   %>% 
+    mutate(Pobre = predict(model1, newdata = test_hogares, type = "raw"))  %>% select(id,Pobre)
+  
+  predictSample<- predictSample %>% 
+    mutate(pobre=ifelse(Pobre=="Yes",1,0)) %>% 
+    select(id,pobre)
+  
+  #Kaggle puntaje = 0.63
+  write.csv(predictSample,"classification_xgboosting.csv", row.names = FALSE)
 }
