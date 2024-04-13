@@ -883,7 +883,17 @@ train_hogares <- train_hogares %>%
 }
 
 #xgboosting con , todas variables y SMOTE 
-#Kaggle puntaje = 0.63
+#Kaggle puntaje = 0.67
+#Tuning parameter 'nrounds' was held constant at a value of 500
+#Tuning parameter 'max_depth' was held constant at
+#a value of 4
+#Tuning parameter 'gamma' was held constant at a value of 0
+#Tuning parameter 'min_child_weight'
+#was held constant at a value of 50
+#Tuning parameter 'subsample' was held constant at a value of 0.4
+#Accuracy was used to select the optimal model using the largest value.
+#The final values used for the model were nrounds = 500, max_depth = 4, eta = 0.25, gamma = 0, colsample_bytree
+#= 0.33, min_child_weight = 50 and subsample = 0.4.
 {
   load("base_final.RData")
   train_hogares <- train_hogares %>% #seleccionar variables
@@ -972,7 +982,7 @@ train_hogares <- train_hogares %>%
   confusionMatrix(data = test$pobre_hat_model1, 
                   reference = test$Pobre, positive="Yes", mode = "prec_recall")
   
-  #F1 = O.65
+  #F1 = O.66
   
   predictSample <- test_hogares   %>% 
     mutate(Pobre = predict(model1, newdata = test_hogares, type = "raw"))  %>% select(id,Pobre)
@@ -981,6 +991,6 @@ train_hogares <- train_hogares %>%
     mutate(pobre=ifelse(Pobre=="Yes",1,0)) %>% 
     select(id,pobre)
   
-  #Kaggle puntaje = 0.63
-  write.csv(predictSample,"classification_xgboosting.csv", row.names = FALSE)
+  #Kaggle puntaje = 0.67
+  #write.csv(predictSample,"classification_xgboosting.csv", row.names = FALSE)
 }
