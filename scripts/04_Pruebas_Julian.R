@@ -144,6 +144,12 @@ colnames(train_hogares)
   train_hogares<-train_hogares %>% mutate (Lnlp <- log(Lp))
   test_hogares<-test_hogares %>% mutate(Lnlp<- log(Lp))
 
+  
+  set.seed(6392) # Para reproducibilidad
+  train_indices <- as.integer(createDataPartition(train_hogares$Pobre, p = 0.8, list = FALSE))
+  train <- train_hogares[train_indices, ]
+  test <- train_hogares[-train_indices, ]
+  
   set.seed(2516)
   
   fitControl<-trainControl(method ="cv",
@@ -151,7 +157,7 @@ colnames(train_hogares)
   
   tree_ranger_grid <- train(
     Ingtotugarr ~ DormitorXpersona + factor(Head_Mujer)  + Dominio + Head_Ocupacion + Head_EducLevel + factor(Head_ocupado) + factor(Head_Rec_subsidio) + Head_Oficio + factor(Head_Segundo_trabajo),
-    data = train_hogares,
+    data = train,
     method = "ranger",
     trControl = fitControl,
     tuneGrid = expand.grid(
@@ -160,9 +166,29 @@ colnames(train_hogares)
       min.node.size = c(1, 3, 5)),
     importance="impurity"
   )
+  
   tree_ranger_grid
   varImp(tree_ranger_grid)
-  train_hogares$PredictRFincome <- predict(tree_ranger_grid, newdata = train_hogares)
+  test$PredictRFincome <- predict(tree_ranger_grid, newdata = test)
+  test$pobre_hat1 <- ifelse(test$PredictRFincome <= test$Lp*test$Nper, 1 ,0)
+
+  test <- test %>% 
+    mutate(pobre_hat1=factor(pobre_hat1,levels=c(0,1),labels=c("No","Yes")))
+      
+      
+  confusionMatrix(data = test$pobre_hat1, 
+                  reference = test$Pobre, positive="Yes", mode = "prec_recall")
+
+  #F1=0.21
   
-  colnames(train_hogares)
+  predictSample <- test_hogares   %>% 
+    mutate(ingreso_predict= predict(tree_ranger_grid, newdata = test_hogares))  %>% select(id,ingreso_predict,Lp,Nper)
   
+  predictSample$pobre <- ifelse(predictSample$ingreso_predict <= predictSample$Lp*predictSample$Nper, 1 ,0)
+  predictSample<- predictSample %>% 
+    select(id,pobre)
+  predictSample1 <- select(predictSample$id, predictSample$pobre) 
+write.csv(predictSample,"Regresion_indirecta_random_forest.csv", row.names=FALSE)
+
+            
+            
