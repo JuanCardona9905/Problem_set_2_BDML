@@ -26,7 +26,7 @@ load("base_final.RData")
 colnames(train_hogares)
 colnames(test_hogares)
 
-#- 1 | Pruebas varias ------------------------------------------------
+#- 2 | Pruebas varias ------------------------------------------------
 
 #Quiero saber cuál variable de ingreso es mejor tomar para hacer las predicciones
 
@@ -43,7 +43,8 @@ prueba <- train_hogares %>%
   summarise(n())
 
 view(prueba)
-#- 2 | Modelo 1: XGBoost con variables relevantes ---------------------
+
+#- 3 | Modelo 1: XGBoost con variables relevantes ---------------------
 
 #Seleccionamos las variables que necesitamos para predecir el ingreso
 train_hogares1 <- dplyr::select(train_hogares, Ln_Ing_tot_hogar, Pobre, Dominio, Depto, P5010, 
