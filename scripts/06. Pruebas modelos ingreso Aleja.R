@@ -378,7 +378,7 @@ set.seed(91519) # Importante definir la semilla antes entrenar
 Xgboost_tree <- train(Ln_Ing_tot_hogar_per_cap~Dominio + Depto + P5010 + P5010^2 + 
                         N_cuartos_hog + Nper + nmenores_5 + nmenores_6_11 + 
                         nmenores_12_17 + nocupados + nincapacitados + ntrabajo_menores + 
-                        Head_Mujer + Head_Afiliado_SS + Npersug + Npersug^2
+                        Head_Mujer + Head_Afiliado_SS + Npersug + Npersug^2 +
                         Head_Rec_subsidio + Head_Rec_vivienda + maxEducLevel + 
                         Head_Segundo_trabajo + DormitorXpersona^2 + Ln_Cuota + Head_Oficio +
                         Ln_Pago_arrien + nmujeres^2 + Ocup_vivienda + 
