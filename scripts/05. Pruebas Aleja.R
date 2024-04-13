@@ -1,4 +1,5 @@
-########### Modelos de prueba CARTs, Random Forest y Boosting ################
+########### Modelos de prueba de clasificación ###############
+########## con métodos CARTs, Random Forest y Boosting ################
 
 #- 1 | Carga de librerias y base de datos ----------------------------------------------------
 rm(list = ls())
