@@ -40,16 +40,16 @@ train_hogares1 <- dplyr::select(train_hogares, Pobre, Dominio, Depto, N_cuartos_
 
 train_hogares1 <- train_hogares1 %>% 
   mutate(
-    Head_Mujer <- factor(Head_Mujer),
-    Head_Afiliado_SS <- factor(Head_Afiliado_SS),
-    Head_exper_ult_trab <- factor(Head_exper_ult_trab),
-    Head_Rec_alimento <- factor(Head_Rec_alimento),
-    Head_Rec_subsidio <- factor(Head_Rec_subsidio),
-    Head_Rec_vivienda <- factor(Head_Rec_vivienda),
-    Head_Ocupacion <- factor(Head_Ocupacion),
-    Ocup_vivienda <- factor(Ocup_vivienda),
-    Head_Cot_pension <- factor(Head_Cot_pension),
-    Head_Segundo_trabajo <- factor(Head_Segundo_trabajo))
+    Head_Mujer = factor(Head_Mujer),
+    Head_Afiliado_SS = factor(Head_Afiliado_SS),
+    Head_exper_ult_trab = factor(Head_exper_ult_trab),
+    Head_Rec_alimento = factor(Head_Rec_alimento),
+    Head_Rec_subsidio = factor(Head_Rec_subsidio),
+    Head_Rec_vivienda = factor(Head_Rec_vivienda),
+    Head_Ocupacion = factor(Head_Ocupacion),
+    Ocup_vivienda = factor(Ocup_vivienda),
+    Head_Cot_pension = factor(Head_Cot_pension),
+    Head_Segundo_trabajo = factor(Head_Segundo_trabajo))
 
 
 #Seleccionamos las mismas variables en la data de test
@@ -60,14 +60,14 @@ test_hogares1 <- test_hogares %>%
          Head_Segundo_trabajo, DormitorXpersona, Ln_Cuota, Ln_Pago_arrien, nmujeres, Ocup_vivienda, 
          Head_Cot_pension) %>% 
   mutate(
-    Head_Mujer <- factor(Head_Mujer),
-    Head_Afiliado_SS <- factor(Head_Afiliado_SS),
-    Head_exper_ult_trab <- factor(Head_exper_ult_trab),
-    Head_Rec_alimento <- factor(Head_Rec_alimento),
-    Head_Rec_subsidio <- factor(Head_Rec_subsidio),
-    Head_Rec_vivienda <- factor(Head_Rec_vivienda),
-    Head_Ocupacion <- factor(Head_Ocupacion),
-    Head_Segundo_trabajo <- factor(Head_Segundo_trabajo))  
+    Head_Mujer = factor(Head_Mujer),
+    Head_Afiliado_SS = factor(Head_Afiliado_SS),
+    Head_exper_ult_trab = factor(Head_exper_ult_trab),
+    Head_Rec_alimento = factor(Head_Rec_alimento),
+    Head_Rec_subsidio = factor(Head_Rec_subsidio),
+    Head_Rec_vivienda = factor(Head_Rec_vivienda),
+    Head_Ocupacion = factor(Head_Ocupacion),
+    Head_Segundo_trabajo = factor(Head_Segundo_trabajo))  
 
 
 #Vamos a seguir un approach de modelo de clasificación donde 1 es pobre y 0 es no pobre
@@ -150,10 +150,11 @@ predictSample<- predictSample %>%
   mutate(pobre=ifelse(Pobre=="Yes",1,0)) %>% 
   dplyr::select(id,pobre)
 
+#Puntaje Kagle 0.59
 write.csv(predictSample,"random_forest_clasificacion_ale1.csv", row.names = FALSE)
 
-#- 3 | Modelo 2: Random forest con variables relevantes y distintas ---------------------
-#WIP
+#- 3 | Modelo 2: Random forest con variables relevantes y distintas formas funcionales ---------------------
+
 #Seleccionamos primero las variables más importantes de la base de entrenamiento hogares
 
 train_hogares1 <- dplyr::select(train_hogares, Pobre, Dominio, Depto, N_cuartos_hog, Nper, nmenores_5, nmenores_6_11, 
@@ -164,16 +165,16 @@ train_hogares1 <- dplyr::select(train_hogares, Pobre, Dominio, Depto, N_cuartos_
 
 train_hogares1 <- train_hogares1 %>% 
   mutate(
-    Head_Mujer <- factor(Head_Mujer),
-    Head_Afiliado_SS <- factor(Head_Afiliado_SS),
-    Head_exper_ult_trab <- factor(Head_exper_ult_trab),
-    Head_Rec_alimento <- factor(Head_Rec_alimento),
-    Head_Rec_subsidio <- factor(Head_Rec_subsidio),
-    Head_Rec_vivienda <- factor(Head_Rec_vivienda),
-    Head_Ocupacion <- factor(Head_Ocupacion),
-    Ocup_vivienda <- factor(Ocup_vivienda),
-    Head_Cot_pension <- factor(Head_Cot_pension),
-    Head_Segundo_trabajo <- factor(Head_Segundo_trabajo))
+    Head_Mujer = factor(Head_Mujer),
+    Head_Afiliado_SS = factor(Head_Afiliado_SS),
+    Head_exper_ult_trab = factor(Head_exper_ult_trab),
+    Head_Rec_alimento = factor(Head_Rec_alimento),
+    Head_Rec_subsidio = factor(Head_Rec_subsidio),
+    Head_Rec_vivienda = factor(Head_Rec_vivienda),
+    Head_Ocupacion = factor(Head_Ocupacion),
+    Ocup_vivienda = factor(Ocup_vivienda),
+    Head_Cot_pension = factor(Head_Cot_pension),
+    Head_Segundo_trabajo = factor(Head_Segundo_trabajo))
 
 
 #Seleccionamos las mismas variables en la data de test
@@ -182,25 +183,34 @@ test_hogares1 <- test_hogares %>%
                 nmenores_12_17, nocupados, nincapacitados, ntrabajo_menores, Head_Mujer, Head_Afiliado_SS, 
                 Head_exper_ult_trab, Head_Rec_alimento, Head_Rec_subsidio, Head_Rec_vivienda, Head_Ocupacion, 
                 Head_Segundo_trabajo, DormitorXpersona, Ln_Cuota, Ln_Pago_arrien, nmujeres, Ocup_vivienda, 
-                Head_Cot_pension) %>% 
-  mutate(
-    Head_Mujer <- factor(Head_Mujer),
-    Head_Afiliado_SS <- factor(Head_Afiliado_SS),
-    Head_exper_ult_trab <- factor(Head_exper_ult_trab),
-    Head_Rec_alimento <- factor(Head_Rec_alimento),
-    Head_Rec_subsidio <- factor(Head_Rec_subsidio),
-    Head_Rec_vivienda <- factor(Head_Rec_vivienda),
-    Head_Ocupacion <- factor(Head_Ocupacion),
-    Head_Segundo_trabajo <- factor(Head_Segundo_trabajo))  
+                Head_Cot_pension) 
 
+test_hogares1 <- test_hogares1%>% 
+  dplyr::mutate(
+    Head_Mujer = factor(Head_Mujer),
+    Head_Afiliado_SS = factor(Head_Afiliado_SS),
+    Head_exper_ult_trab = factor(Head_exper_ult_trab),
+    Head_Rec_alimento = factor(Head_Rec_alimento),
+    Head_Rec_subsidio = factor(Head_Rec_subsidio),
+    Head_Rec_vivienda = factor(Head_Rec_vivienda),
+    Head_Ocupacion = factor(Head_Ocupacion),
+    Head_Segundo_trabajo = factor(Head_Segundo_trabajo))  
+
+#Agreguemos algunas interacciones en la data
+train_hogares1$nocupados2 <- train_hogares1$nocupados^2
+test_hogares1$nocupados2 <- test_hogares1$nocupados^2
+train_hogares1$ntrabajo_menores2 <- train_hogares1$ntrabajo_menores^2
+test_hogares1$ntrabajo_menores2 <- test_hogares1$ntrabajo_menores^2
+train_hogares1$nincapacitados2 <- train_hogares1$nincapacitados^2
+test_hogares1$nincapacitados2 <- test_hogares1$nincapacitados^2
 
 #Vamos a seguir un approach de modelo de clasificación donde 1 es pobre y 0 es no pobre
 
 RF<- ranger(Pobre~Dominio + Depto + N_cuartos_hog + Nper + nmenores_5 + nmenores_6_11 + 
-              nmenores_12_17 + nocupados + nincapacitados + ntrabajo_menores + Head_Mujer + Head_Afiliado_SS + 
-              Head_exper_ult_trab + Head_Rec_alimento + Head_Rec_subsidio + Head_Rec_vivienda + Head_Ocupacion + 
-              Head_Segundo_trabajo + DormitorXpersona + Ln_Cuota + Ln_Pago_arrien + nmujeres + Ocup_vivienda + 
-              Head_Cot_pension, 
+              nmenores_12_17 + nocupados + nincapacitados + Head_Mujer +  
+              Head_exper_ult_trab + Head_Rec_alimento + Head_Rec_subsidio + Head_Ocupacion + 
+              Head_Segundo_trabajo + DormitorXpersona + Ln_Pago_arrien + Ocup_vivienda + 
+              Head_Cot_pension + nocupados2 + ntrabajo_menores2 + nincapacitados2, 
             data = train_hogares1,
             num.trees= 500, ## Numero de bootstrap samples y arboles a estimar. Default 500  
             mtry= 4,   # N. var aleatoriamente seleccionadas en cada partición. Baggin usa todas las vars.
@@ -232,25 +242,24 @@ ctrl<- trainControl(method = "cv",
 
 # Definamos el grid sobre el cual se realizará la búsqueda
 
-mtry_grid<-expand.grid(mtry =c(2,4,6,8), # 8 inclueye bagging
-                       min.node.size= c(1, 5, 10, 20, 35, 50), #controla la complejidad del arbol
+mtry_grid<-expand.grid(mtry =c(10,15,30), # 8 inclueye bagging
+                       min.node.size= c(25,50,100), #controla la complejidad del arbol
                        splitrule= 'gini') #splitrule fija en gini. 
 mtry_grid
 
 #Usemos train para buscar la mejor combinación de parámetros
 
 cv_RForest <- train(Pobre~Dominio + Depto + N_cuartos_hog + Nper + nmenores_5 + nmenores_6_11 + 
-                      nmenores_12_17 + nocupados + nincapacitados + ntrabajo_menores + Head_Mujer + Head_Afiliado_SS + 
-                      Head_exper_ult_trab + Head_Rec_alimento + Head_Rec_subsidio + Head_Rec_vivienda + Head_Ocupacion + 
-                      Head_Segundo_trabajo + DormitorXpersona + Ln_Cuota + Ln_Pago_arrien + nmujeres + Ocup_vivienda + 
-                      Head_Cot_pension, 
+                      nmenores_12_17 + nocupados + nincapacitados + Head_Mujer +  
+                      Head_exper_ult_trab + Head_Rec_alimento + Head_Rec_subsidio + Head_Ocupacion + 
+                      Head_Segundo_trabajo + DormitorXpersona + Ln_Pago_arrien + Ocup_vivienda + 
+                      Head_Cot_pension + nocupados2 + ntrabajo_menores2 + nincapacitados2, 
                     data = train_hogares1,
                     method = "ranger",
                     trControl = ctrl,
                     metric="ROC",
                     tuneGrid = mtry_grid,
                     ntree=500)
-
 
 # Veamos el modelo final
 cv_RForest$finalModel
@@ -274,4 +283,68 @@ predictSample<- predictSample %>%
   mutate(pobre=ifelse(Pobre=="Yes",1,0)) %>% 
   dplyr::select(id,pobre)
 
-write.csv(predictSample,"random_forest_clasificacion_ale1.csv", row.names = FALSE)
+write.csv(predictSample,"random_forest_clasificacion_ale2.csv", row.names = FALSE)
+
+### Revisemos el F1 del modelo ###
+
+#Primero verifiquemos de la data de entrenamiento cuales variables son distintas a numeric
+sapply(train_hogares1, class)
+
+#Cambiamos las variables a numericas
+dummys <- dummy(subset(train_hogares1, select = c(Dominio, Depto, Head_Mujer, Head_Afiliado_SS,
+                                                  Head_exper_ult_trab,Head_Rec_alimento,Head_Rec_subsidio,
+                                                  Head_Rec_vivienda,Head_Ocupacion,Head_Segundo_trabajo,
+                                                  Ocup_vivienda,Head_Cot_pension)))
+dummys <- as.data.frame(apply(dummys,2,function(x){as.numeric(x)}))
+
+train_hogares1 <- cbind(subset(train_hogares1, select = -c(Dominio, Depto, Head_Mujer, Head_Afiliado_SS,
+                                                           Head_exper_ult_trab,Head_Rec_alimento,Head_Rec_subsidio,
+                                                           Head_Rec_vivienda,Head_Ocupacion,Head_Segundo_trabajo,
+                                                           Ocup_vivienda,Head_Cot_pension)),dummys)
+
+dummys <- dummy(subset(test_hogares1, select = c(Dominio, Depto, Head_Mujer, Head_Afiliado_SS,
+                                                 Head_exper_ult_trab,Head_Rec_alimento,Head_Rec_subsidio,
+                                                 Head_Rec_vivienda,Head_Ocupacion,Head_Segundo_trabajo,
+                                                 Ocup_vivienda,Head_Cot_pension)))
+dummys <- as.data.frame(apply(dummys,2,function(x){as.numeric(x)}))
+
+test_hogares1 <- cbind(subset(test_hogares1, select = -c(Dominio, Depto, Head_Mujer, Head_Afiliado_SS,
+                                                        Head_exper_ult_trab,Head_Rec_alimento,Head_Rec_subsidio,
+                                                        Head_Rec_vivienda,Head_Ocupacion,Head_Segundo_trabajo,
+                                                        Ocup_vivienda,Head_Cot_pension)),dummys)
+
+# Dividir los datos en conjuntos de entrenamiento (train) y prueba (test)
+set.seed(6392) # Para reproducibilidad
+train_indices <- as.integer(createDataPartition(train_hogares1$Pobre, p = 0.8, list = FALSE))
+train <- train_hogares1[train_indices, ]
+test <- train_hogares1[-train_indices, ]
+prop.table(table(train$Pobre))
+prop.table(table(test$Pobre))
+
+predictors <- colnames(train  %>% dplyr::select(-Pobre))
+smote_output <- SMOTE(X = train[predictors],
+                      target = train$Pobre)
+smote_data <- smote_output$data
+
+table(train$Pobre)
+table(smote_data$class)
+
+model1 <- train(class ~ ., 
+                data = smote_data, 
+                method = "ranger",
+                trControl = ctrl,
+                metric="ROC",
+                tuneGrid = mtry_grid,
+                ntree=500)
+
+model1
+model1$finalModel
+
+test<- test  %>% mutate(pobre_hat_model1=predict(model1,newdata = test,
+                                                 type = "raw"))
+confusionMatrix(data = test$pobre_hat_model1, 
+                reference = test$Pobre, positive="Yes", mode = "prec_recall")
+
+
+#F1 = O.6455
+
