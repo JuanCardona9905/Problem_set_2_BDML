@@ -107,35 +107,43 @@ test_hogares1 <- test_hogares %>%
 
 sapply(train_hogares1,class)
 
-dummys <- dummy(subset(train_hogares1, select = c(Dominio,Depto,Head_Mujer,Head_Afiliado_SS,
-                                                  Head_exper_ult_trab,Head_Rec_alimento,
-                                                  Head_Rec_subsidio,Head_Rec_vivienda,
-                                                  Head_Ocupacion,maxEducLevel,Head_Primas,
-                                                  Head_Segundo_trabajo,Head_Oficio,
-                                                  Ocup_vivienda,Head_Cot_pension,Cabecera)))
-dummys <- as.data.frame(apply(dummys,2,function(x){as.numeric(x)}))
+train_hogares1 <- train_hogares1 %>% mutate(Dominio = as.numeric(Dominio),
+                                            Depto = as.numeric(Depto),
+                                            Head_Mujer = as.numeric(Head_Mujer),
+                                            Head_Afiliado_SS = as.numeric(Head_Afiliado_SS),
+                                            Head_exper_ult_trab = as.numeric(Head_exper_ult_trab),
+                                            Head_Rec_alimento = as.numeric(Head_Rec_alimento),
+                                            Head_Rec_subsidio = as.numeric(Head_Rec_subsidio),
+                                            Head_Rec_vivienda = as.numeric(Head_Rec_vivienda),
+                                            Head_Ocupacion = as.numeric(Head_Ocupacion),
+                                            maxEducLevel = as.numeric(maxEducLevel),
+                                            Head_Primas = as.numeric(Head_Primas),
+                                            Head_Segundo_trabajo = as.numeric(Head_Segundo_trabajo),
+                                            Head_Oficio = as.numeric(Head_Oficio),
+                                            Ocup_vivienda = as.numeric(Ocup_vivienda),
+                                            Head_Cot_pension = as.numeric(Head_Cot_pension),
+                                            Cabecera = as.numeric(Cabecera))
 
-train_hogares1 <- cbind(subset(train_hogares1, select = -c(Dominio,Depto,Head_Mujer,Head_Afiliado_SS,
-                                                           Head_exper_ult_trab,Head_Rec_alimento,
-                                                           Head_Rec_subsidio,Head_Rec_vivienda,
-                                                           Head_Ocupacion,maxEducLevel,Head_Primas,
-                                                           Head_Segundo_trabajo,Head_Oficio,
-                                                           Ocup_vivienda,Head_Cot_pension,Cabecera)),dummys)
+test_hogares1 <- test_hogares1 %>% mutate(Dominio = as.numeric(Dominio),
+                                            Depto = as.numeric(Depto),
+                                            Head_Mujer = as.numeric(Head_Mujer),
+                                            Head_Afiliado_SS = as.numeric(Head_Afiliado_SS),
+                                            Head_exper_ult_trab = as.numeric(Head_exper_ult_trab),
+                                            Head_Rec_alimento = as.numeric(Head_Rec_alimento),
+                                            Head_Rec_subsidio = as.numeric(Head_Rec_subsidio),
+                                            Head_Rec_vivienda = as.numeric(Head_Rec_vivienda),
+                                            Head_Ocupacion = as.numeric(Head_Ocupacion),
+                                            maxEducLevel = as.numeric(maxEducLevel),
+                                            Head_Primas = as.numeric(Head_Primas),
+                                            Head_Segundo_trabajo = as.numeric(Head_Segundo_trabajo),
+                                            Head_Oficio = as.numeric(Head_Oficio),
+                                            Ocup_vivienda = as.numeric(Ocup_vivienda),
+                                            Head_Cot_pension = as.numeric(Head_Cot_pension),
+                                            Cabecera = as.numeric(Cabecera))
 
-dummys <- dummy(subset(test_hogares1, select = c(Dominio,Depto,Head_Mujer,Head_Afiliado_SS,
-                                                 Head_exper_ult_trab,Head_Rec_alimento,
-                                                 Head_Rec_subsidio,Head_Rec_vivienda,
-                                                 Head_Ocupacion,maxEducLevel,Head_Primas,
-                                                 Head_Segundo_trabajo,Head_Oficio,
-                                                 Ocup_vivienda,Head_Cot_pension,Cabecera)))
-dummys <- as.data.frame(apply(dummys,2,function(x){as.numeric(x)}))
-
-test_hogares1 <- cbind(subset(test_hogares1, select = -c(Dominio,Depto,Head_Mujer,Head_Afiliado_SS,
-                                                         Head_exper_ult_trab,Head_Rec_alimento,
-                                                         Head_Rec_subsidio,Head_Rec_vivienda,
-                                                         Head_Ocupacion,maxEducLevel,Head_Primas,
-                                                         Head_Segundo_trabajo,Head_Oficio,
-                                                         Ocup_vivienda,Head_Cot_pension,Cabecera)),dummys)
+#Revisemos rápidamente
+sapply(train_hogares1,class)
+sapply(train_hogares1,class)
 
 
 # Dividimos la muestra para entrenar al modelo
