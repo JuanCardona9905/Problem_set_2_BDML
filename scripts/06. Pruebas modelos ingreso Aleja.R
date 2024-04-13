@@ -44,7 +44,7 @@ prueba <- train_hogares %>%
 
 view(prueba)
 
-#- 3 | Modelo 1: XGBoost con variables relevantes ---------------------
+#- 3 | Modelo 1: XGBoost con Ingtotug con variables relevantes ---------------------
 
 #Seleccionamos las variables que necesitamos para predecir el ingreso
 train_hogares1 <- dplyr::select(train_hogares, Ingtotug,
