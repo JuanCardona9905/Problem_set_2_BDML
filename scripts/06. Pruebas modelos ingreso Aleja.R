@@ -231,7 +231,7 @@ predictSample<- predictSample %>%
 #Kaggle puntaje = 
 write.csv(predictSample,"income_prediction_xgboosting_ale1.csv", row.names = FALSE)
 
-#- 4 | Modelo 3: XGBoost predicción del ingreso con Ln_ingpcug --------------------------
+#- 4 | Modelo 2: XGBoost predicción del ingreso con Ln_ingpcug --------------------------
 
 ### Arreglo de data ###
 
