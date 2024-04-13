@@ -47,7 +47,8 @@ view(prueba)
 #- 3 | Modelo 1: XGBoost con variables relevantes ---------------------
 
 #Seleccionamos las variables que necesitamos para predecir el ingreso
-train_hogares1 <- dplyr::select(train_hogares, Ln_Ing_tot_hogar, Pobre, Dominio, Depto, P5010, 
+train_hogares1 <- dplyr::select(train_hogares, Ingtotug,
+                                Pobre, Dominio, Depto, P5010, 
                                 N_cuartos_hog, Nper, nmenores_5, nmenores_6_11, 
                                 nmenores_12_17, nocupados, nincapacitados, ntrabajo_menores, 
                                 Head_Mujer, Head_Afiliado_SS, P5140, Npersug, Lp, Li,
@@ -150,7 +151,7 @@ sapply(train_hogares1,class)
 set.seed(91519) # Importante definir la semilla. 
 
 inTrain <- createDataPartition(
-  y = train_hogares1$Ln_Ing_tot_hogar,## La variable dependiente u objetivo 
+  y = train_hogares1$Ingtotug,## La variable dependiente u objetivo 
   p = .7, ## Usamos 70%  de los datos en el conjunto de entrenamiento 
   list = FALSE)
 
@@ -176,7 +177,7 @@ grid_xbgoost
 
 #Entrenamos el modelo
 set.seed(91519) # Importante definir la semilla antes entrenar
-Xgboost_tree <- train(Ln_Ing_tot_hogar~Dominio + Depto + P5010 + 
+Xgboost_tree <- train(Ingtotug~Dominio + Depto + P5010 + 
                       N_cuartos_hog + Nper + nmenores_5 + nmenores_6_11 + 
                       nmenores_12_17 + nocupados + nincapacitados + ntrabajo_menores + 
                       Head_Mujer + Head_Afiliado_SS + P5140 + Npersug +
@@ -193,14 +194,23 @@ Xgboost_tree <- train(Ln_Ing_tot_hogar~Dominio + Depto + P5010 +
 
 Xgboost_tree
 
+
+test<- test  %>% mutate(Ingtotug_hat=predict(Xgboost_tree,newdata = test))
+
+confusionMatrix(data = test$Ingtotug_hat)
+
+confusionMatrix(data = test$Ingtotug_hat, 
+                reference = test$Pobre, positive="Yes", mode = "prec_recall")
+
+
 #Obtenemos el AUC para este modelo
-pred_prob <- predict(Xgboost_tree,
-                     newdata = test, 
-                     type = "prob")   
+#pred_prob <- predict(Xgboost_tree,
+#                     newdata = test, 
+#                     type = "prob")   
 
 
-aucval_XGboost <- Metrics::auc(actual = default,predicted = pred_prob[,2])
-aucval_XGboost 
+#aucval_XGboost <- Metrics::auc(actual = default,predicted = pred_prob[,2])
+#aucval_XGboost 
 
 
 #Representemos gráficamente los árboles entrenados
@@ -208,8 +218,6 @@ p_load(DiagrammeR)
 tree_plot <- xgb.plot.tree(model = Xgboost_tree$finalModel,
                            trees = 1:2, plot_width = 1000, plot_height = 500)
 tree_plot
-
-
 
 
 
