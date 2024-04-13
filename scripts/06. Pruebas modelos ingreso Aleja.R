@@ -197,21 +197,16 @@ Xgboost_tree
 
 test<- test  %>% mutate(Ingtotug_hat=predict(Xgboost_tree,newdata = test))
 
-confusionMatrix(data = test$Ingtotug_hat)
+# Para medir el F1 primero creemos la variable de pobreza predicha
 
-confusionMatrix(data = test$Ingtotug_hat, 
+test <- test %>% mutate(Pobre_hat = ifelse(Ingtotug_hat<Lp,"Yes","No"))
+test$Pobre_hat <- factor(test$Pobre_hat)
+
+#Ahora sí podemos extraer el F1 del confusionmatrix
+confusionMatrix(data = test$Pobre_hat, 
                 reference = test$Pobre, positive="Yes", mode = "prec_recall")
 
-
-#Obtenemos el AUC para este modelo
-#pred_prob <- predict(Xgboost_tree,
-#                     newdata = test, 
-#                     type = "prob")   
-
-
-#aucval_XGboost <- Metrics::auc(actual = default,predicted = pred_prob[,2])
-#aucval_XGboost 
-
+#F1 = 0.35
 
 #Representemos gráficamente los árboles entrenados
 p_load(DiagrammeR)
@@ -219,5 +214,20 @@ tree_plot <- xgb.plot.tree(model = Xgboost_tree$finalModel,
                            trees = 1:2, plot_width = 1000, plot_height = 500)
 tree_plot
 
+# Ahora hagamos la predicción en la data de test hogares
 
+predictSample <- test_hogares1   %>% 
+  mutate(Ingtotug_hat = predict(Xgboost_tree, newdata = test_hogares1))
+
+predictSample <- predictSample %>% mutate(Pobre = ifelse(Ingtotug_hat<Lp,"Yes","No"))
+predictSample$Pobre <- factor(predictSample$Pobre)
+
+predictSample <- predictSample %>% select(id,Pobre)
+
+predictSample<- predictSample %>% 
+  mutate(pobre=ifelse(Pobre=="Yes",1,0)) %>% 
+  select(id,pobre)
+
+#Kaggle puntaje = 
+write.csv(predictSample,"income_prediction_xgboosting_ale1.csv", row.names = FALSE)
 
