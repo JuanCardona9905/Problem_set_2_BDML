@@ -349,7 +349,7 @@ sapply(train_hogares1,class)
 set.seed(91519) # Importante definir la semilla. 
 
 inTrain <- createDataPartition(
-  y = train_hogares1$Ln_Ing_tot_hogar,## La variable dependiente u objetivo 
+  y = train_hogares1$Ln_Ing_tot_hogar_per_cap,## La variable dependiente u objetivo 
   p = .7, ## Usamos 70%  de los datos en el conjunto de entrenamiento 
   list = FALSE)
 
