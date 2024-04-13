@@ -103,39 +103,84 @@ test_hogares1 <- test_hogares %>%
     Cabecera = factor(Cabecera))
 
 
+#Convirtamos las variables categóricas en numéricas
+
+sapply(train_hogares1,class)
+
+dummys <- dummy(subset(train_hogares1, select = c(Dominio,Depto,Head_Mujer,Head_Afiliado_SS,
+                                                  Head_exper_ult_trab,Head_Rec_alimento,
+                                                  Head_Rec_subsidio,Head_Rec_vivienda,
+                                                  Head_Ocupacion,maxEducLevel,Head_Primas,
+                                                  Head_Segundo_trabajo,Head_Oficio,
+                                                  Ocup_vivienda,Head_Cot_pension,Cabecera)))
+dummys <- as.data.frame(apply(dummys,2,function(x){as.numeric(x)}))
+
+train_hogares1 <- cbind(subset(train_hogares1, select = -c(Dominio,Depto,Head_Mujer,Head_Afiliado_SS,
+                                                           Head_exper_ult_trab,Head_Rec_alimento,
+                                                           Head_Rec_subsidio,Head_Rec_vivienda,
+                                                           Head_Ocupacion,maxEducLevel,Head_Primas,
+                                                           Head_Segundo_trabajo,Head_Oficio,
+                                                           Ocup_vivienda,Head_Cot_pension,Cabecera)),dummys)
+
+dummys <- dummy(subset(test_hogares1, select = c(Dominio,Depto,Head_Mujer,Head_Afiliado_SS,
+                                                 Head_exper_ult_trab,Head_Rec_alimento,
+                                                 Head_Rec_subsidio,Head_Rec_vivienda,
+                                                 Head_Ocupacion,maxEducLevel,Head_Primas,
+                                                 Head_Segundo_trabajo,Head_Oficio,
+                                                 Ocup_vivienda,Head_Cot_pension,Cabecera)))
+dummys <- as.data.frame(apply(dummys,2,function(x){as.numeric(x)}))
+
+test_hogares1 <- cbind(subset(test_hogares1, select = -c(Dominio,Depto,Head_Mujer,Head_Afiliado_SS,
+                                                         Head_exper_ult_trab,Head_Rec_alimento,
+                                                         Head_Rec_subsidio,Head_Rec_vivienda,
+                                                         Head_Ocupacion,maxEducLevel,Head_Primas,
+                                                         Head_Segundo_trabajo,Head_Oficio,
+                                                         Ocup_vivienda,Head_Cot_pension,Cabecera)),dummys)
+
 
 # Dividimos la muestra para entrenar al modelo
 set.seed(91519) # Importante definir la semilla. 
 
 inTrain <- createDataPartition(
-  y = credit$Default,## La variable dependiente u objetivo 
+  y = train_hogares1$Ln_Ing_tot_hogar,## La variable dependiente u objetivo 
   p = .7, ## Usamos 70%  de los datos en el conjunto de entrenamiento 
   list = FALSE)
 
 
-train <- credit[ inTrain,]
-test  <- credit[-inTrain,]
+train <- train_hogares1[ inTrain,]
+test  <- train_hogares1[-inTrain,]
+
+#Ajuste del modelo
+
+fitControl<-trainControl(method ="cv",
+                         number=3)
 
 #Cargamos los parámetros del boosting
-grid_xbgoost <- expand.grid(nrounds = c(250,500),
-                            max_depth = c(1, 2),
-                            eta = c(0.1,  0.01), 
-                            gamma = c(0, 1), 
+grid_xbgoost <- expand.grid(nrounds = c(250),
+                            max_depth = c(4),
+                            eta = c(0.01), 
+                            gamma = c(0), 
                             min_child_weight = c(10, 25),
-                            colsample_bytree = c(0.4, 0.7), 
-                            subsample = c(0.7))
+                            colsample_bytree = c(0.33,0.66), 
+                            subsample = c(0.4))
 grid_xbgoost
+
 
 #Entrenamos el modelo
 set.seed(91519) # Importante definir la semilla antes entrenar
-Xgboost_tree <- train(Default~duration+amount+installment+age+
-                        history+purpose+foreign+rent,
+Xgboost_tree <- train(Ln_Ing_tot_hogar~Dominio + Depto + P5010 + 
+                      N_cuartos_hog + Nper + nmenores_5 + nmenores_6_11 + 
+                      nmenores_12_17 + nocupados + nincapacitados + ntrabajo_menores + 
+                      Head_Mujer + Head_Afiliado_SS + P5140 + Npersug +
+                      Head_exper_ult_trab + Head_Rec_alimento + Head_Rec_subsidio + 
+                      Head_Rec_vivienda + Head_Ocupacion + maxEducLevel + Head_Primas +
+                      Head_Segundo_trabajo + DormitorXpersona + Ln_Cuota + Head_Oficio +
+                      Ln_Pago_arrien + nmujeres + Ocup_vivienda + 
+                      Head_Cot_pension + Cabecera,
                       data = train, 
                       method = "xgbTree", 
-                      trControl = ctrl,
-                      tuneGrid=grid_xbgoost,
-                      metric = "ROC",
-                      verbosity = 0
+                      trControl = fitControl,
+                      tuneGrid=grid_xbgoost
 )         
 
 Xgboost_tree
@@ -150,7 +195,7 @@ aucval_XGboost <- Metrics::auc(actual = default,predicted = pred_prob[,2])
 aucval_XGboost 
 
 
-#Representemos gráficamente os árboles entrenados
+#Representemos gráficamente los árboles entrenados
 p_load(DiagrammeR)
 tree_plot <- xgb.plot.tree(model = Xgboost_tree$finalModel,
                            trees = 1:2, plot_width = 1000, plot_height = 500)
