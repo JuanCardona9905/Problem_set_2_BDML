@@ -1,5 +1,5 @@
-#main script
-#este código contiene todos los scripts utilizados para el problem set 2
+#Main Script
+#Este código contiene todos los scripts utilizados para el problem set 2
 
 
 #se borra la memoria
@@ -66,7 +66,7 @@ source("03_Pruebas_Camila.R")
 
 #Script: "04_Pruebas_Julian.R". Predicciones de Clasificación directa e indirecta
 setwd(paste0(wd,"/scripts"))
-source("04_gender_earnings_gap.R")
+source("04_Pruebas_Julian.R")
 
 
 #Script: "05_Pruebas_Alejandra.R". Predicciones de Clasificación directa e indirecta

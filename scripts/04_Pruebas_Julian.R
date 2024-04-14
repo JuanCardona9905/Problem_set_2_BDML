@@ -1,4 +1,4 @@
-rm(list = ls())
+
 require("pacman")
 p_load("tidyverse",
        "glmnet",
