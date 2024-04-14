@@ -164,19 +164,42 @@ table(smote_data$class)
 
 set.seed(6392)
 
-ctrl<- trainControl(method = "cv",
-                    number = 5,
-                    classProbs = TRUE,
-                    savePredictions = T)
+# Define una función de resumen personalizada que incluya F1
+fiveStats <- function(data, lev = NULL, model = NULL) {
+  out <- twoClassSummary(data, lev = lev, model = model)
+  out$F1 <- F1_Score(data$obs, data$pred)
+  out
+}
 
-model1 <- train(class~.,
-                data=smote_data,
-                metric = "Accuracy",
-                method = "glmnet",
-                trControl = ctrl,
-                tuneGrid=expand.grid(
-                  alpha = seq(0,1,by=.2),
-                  lambda =10^seq(10, -2, length = 10)))
+# Función para calcular F1 Score
+F1_Score <- function(actual, predicted) {
+  cm <- confusionMatrix(actual, predicted)
+  f1 <- ifelse(sum(cm$table) > 0, cm$byClass["F1"], 0)
+  f1
+}
+
+# Configuración de control para el entrenamiento del modelo
+ctrl <- trainControl(
+  method = "cv",
+  number = 5,
+  summaryFunction = fiveStats,
+  classProbs = TRUE, 
+  verbose = FALSE,
+  savePredictions = TRUE
+)
+
+# Entrenamiento del modelo con métrica "F1"
+model1 <- train(
+  class ~ .,
+  data = smote_data,
+  metric = "F1",  # Utiliza F1 para la evaluación
+  method = "glmnet",
+  trControl = ctrl,
+  tuneGrid = expand.grid(
+    alpha = seq(0, 1, by = 0.2),
+    lambda = 10^seq(10, -2, length = 10)
+  )
+)
 
 model1
 
@@ -768,7 +791,7 @@ train_hogares <- train_hogares %>%
     mutate(pobre=ifelse(Pobre=="Yes",1,0)) %>% 
     select(id,pobre)
   
-  write.csv(predictSample,"classification_random_forest2.csv", row.names = FALSE)
+  #write.csv(predictSample,"classification_random_forest2.csv", row.names = FALSE)
   
   #aucval_rf <- Metrics::auc(actual = Pobre,predicted =rf_pred[,2])
   #aucval_rf
@@ -993,4 +1016,104 @@ train_hogares <- train_hogares %>%
   
   #Kaggle puntaje = 0.67
   #write.csv(predictSample,"classification_xgboosting.csv", row.names = FALSE)
+}
+
+#xgboosting con todas las variables (indirecta)
+{
+  load("base_final.RData")
+  train_hogares <- train_hogares %>% #seleccionar variables
+    select(-id,
+           -Clase, #ya esta cabecera
+           -P5010, #¿en cuántos de esos cuartos duermen las personas de este hogar?
+           -P5100,#cuando paga por amort (ya esta con ln(cuota)
+           -P5140,#arriendo ya esta con ln,
+           -Npersug, #no. personas unidad gasto,
+           -Ingtotug,
+           #-Ingtotugarr,
+           -Li,
+           -Lp,
+           -Ingpcug,
+           -Ln_Ing_tot_hogar_imp_arr,
+           -Ln_Ing_tot_hogar_per_cap,
+           -Ln_Ing_tot_hogar,
+           -Fex_c,
+           -Pobre)
+  
+  test_hogares <- test_hogares %>% #seleccionar variables
+    select(-Clase, #ya esta cabecera
+           -P5010, #¿en cuántos de esos cuartos duermen las personas de este hogar?
+           -P5100,#cuando paga por amort (ya esta con ln(cuota)
+           -P5140,#arriendo ya esta con ln,
+           -Li,
+           #-Lp,
+           #-Npersug, #no. personas unidad gasto,
+           -Fex_c)
+  
+  train_hogares <- train_hogares %>% 
+    mutate(
+      Head_Mujer <- factor(Head_Mujer),
+      Depto <- factor(Depto),
+      Head_ocupado <- factor(Head_ocupado),
+      Head_Reg_subs_salud <- factor(Head_Reg_subs_salud),
+      Head_Afiliado_SS <- factor(Head_Afiliado_SS),
+      Head_Rec_alimento <- factor(Head_Rec_alimento),
+      Head_Rec_subsidio <- factor(Head_Rec_subsidio),
+      Head_Cot_pension <- factor(Head_Cot_pension),
+      Head_Rec_vivienda <- factor(Head_Rec_vivienda),
+      Head_Ocupacion <- factor(Head_Ocupacion),
+      Head_Segundo_trabajo <- factor(Head_Segundo_trabajo),
+      Head_Nivel_formalidad <- factor(Head_Nivel_formalidad),
+      Head_Oficio <- factor(Head_Oficio),
+      Head_Primas <- factor(Head_Primas),
+      Head_Bonificaciones <- factor(Head_Bonificaciones),
+      Head_Segundo_trabajo <- factor(Head_Segundo_trabajo),
+      Cabecera <- factor(Cabecera))  
+  
+  test_hogares <- test_hogares %>% 
+    mutate(
+      Head_Mujer <- factor(Head_Mujer),
+      Depto <- factor(Depto),
+      Head_ocupado <- factor(Head_ocupado),
+      Head_Reg_subs_salud <- factor(Head_Reg_subs_salud),
+      Head_Afiliado_SS <- factor(Head_Afiliado_SS),
+      Head_Rec_alimento <- factor(Head_Rec_alimento),
+      Head_Rec_subsidio <- factor(Head_Rec_subsidio),
+      Head_Cot_pension <- factor(Head_Cot_pension),
+      Head_Rec_vivienda <- factor(Head_Rec_vivienda),
+      Head_Ocupacion <- factor(Head_Ocupacion),
+      Head_Segundo_trabajo <- factor(Head_Segundo_trabajo),
+      Head_Nivel_formalidad <- factor(Head_Nivel_formalidad),
+      Head_Oficio <- factor(Head_Oficio),
+      Head_Primas <- factor(Head_Primas),
+      Head_Bonificaciones <- factor(Head_Bonificaciones),
+      Head_Segundo_trabajo <- factor(Head_Segundo_trabajo),
+      Cabecera <- factor(Cabecera))  
+  
+  fitControl<-trainControl(method ="cv",
+                           number=5)
+  
+  grid_xbgoost <- expand.grid(nrounds = c(500),
+                              max_depth = c(4), 
+                              eta = c(0.01,0.25,0.5), 
+                              gamma = c(0), 
+                              min_child_weight = c(50),
+                              colsample_bytree = c(0.33,0.66),
+                              subsample = c(0.4))
+  set.seed(6392)
+  model1 <- train(Ingtotugarr~.,
+                  data=train_hogares,
+                  method = "xgbTree", 
+                  trControl = fitControl,
+                  tuneGrid=grid_xbgoost)        
+  model1
+  
+  predictSample <- test_hogares   %>% 
+    mutate(ingreso_predict= predict(model1, newdata = test_hogares))  %>% select(id,ingreso_predict,Lp,Nper)
+  
+  predictSample$pobre <- ifelse(predictSample$ingreso_predict <= predictSample$Lp*predictSample$Nper, 1 ,0)
+  predictSample<- predictSample %>% 
+    select(id,pobre)
+
+  write.csv(predictSample,"Regresion_indirecta_xgboosting_cami.csv", row.names=FALSE)
+  
 }
