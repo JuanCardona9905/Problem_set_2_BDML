@@ -1,0 +1,7 @@
+No. Modelo | Algoritmo                     | Variables | Remuestreo | Puntaje Kaggle
+-----------|-------------------------------|-----------|------------|----------------
+1          | Linear Discriminant Analysis | Grupo 1   | SMOTE      | 0.66
+2          | Elastic Net                   |           |            | 0.66
+3          | Logit                         |           |            | 0.66
+4          | Random Forest                 |           |            | 0.63
+5          | XGBoosting                    |           |            | 0.67

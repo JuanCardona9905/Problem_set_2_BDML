@@ -1,0 +1,5 @@
+No. Modelo | Algoritmo     | Variables | Puntaje Kaggle
+-----------|---------------|-----------|----------------
+1          | Lineal        | Grupo 1   | 0.63
+2          | Random Forest |           | 0.20
+3          | XGBoosting    |           | 0.41
