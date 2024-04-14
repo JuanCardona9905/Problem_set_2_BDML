@@ -1,0 +1,37 @@
+
+| Fuente de datos | Variable          | Descripción                                                                                                         |
+|-----------------|-------------------|---------------------------------------------------------------------------------------------------------------------|
+| Hogares         | Nper          | Número de personas.                                                                                                 |
+|                 | Cabecera      | Dummy si se encuentra en área urbana.                                                                               |
+|                 | Dpto          | Departamento donde está ubicado el hogar.                                                                           |
+|                 | Fex_dpto    | Factor de expansión del departamento.                                                                               |
+|                 | Dominio       | Clasifica ciudades principales y agrupa las demás en 'resto urbano' y 'resto rural'.                                |
+|                 | Ncuartos      | Número de cuartos.                                                                                                  |
+|                 | Ocup_vivienda | Ocupación la vivienda (propia, en arriendo, entre otros).                                                           |
+|                 | Ln_Cuota    | Logaritmo natural de la cuota de amortización (hogares que están pagando la vivienda).                               |
+|                 | Ln_Arriendo | Logaritmo natural del valor del arriendo de la vivienda.                                                            |
+|                 | PerXCuarto    | Número de cuartos por persona (no. personas / no. cuartos).                                                         |
+|                 |                   |                                                                                                                     |
+| Personas        | Nmujeres      | Número de mujeres.                                                                                                  |
+|                 | Menores_5    | Menores de 5 años.                                                                                                  |
+|                 | Menores_6_11 | Menores entre 6 y 11 años.                                                                                        |
+|                 | Menores_12_17 | Menores entre 12 y 17 años.                                                                                      |
+|                 | Nmenores_ocup | Número de menores de 18 años que se encuentran ocupados.                                                          |
+|                 | Max_educ      | Máximo nivel de educación.                                                                                        |
+|                 | Ninc_trab     | Número de personas que estaban incapacitadas para trabajar la semana anterior a la encuesta.                       |
+|                 | Jefe_mujer    | Dummy si el jefe de hogar es mujer.                                                                               |
+|                 | Jefe_ocupacion | Ocupación del jefe de hogar.                                                                                     |
+|                 | Jefe_oficio    | Oficio del jefe de hogar.                                                                                        |
+|                 | Jefe_ocup      | Dummy si el jefe de hogar se encuentra ocupado.                                                                   |
+|                 | Jefe_educ      | Nivel de educación del jefe de hogar.                                                                            |
+|                 | Jefe_SS        | Dummy si el jefe de hogar se encuentra afiliado al sistema de seguridad social en salud.                           |
+|                 | Jefe_RSS       | Dummy si el jefe de hogar pertenece al régimen subsidiado en salud.                                                |
+|                 | Jefe_rec_viv   | Dummy si el jefe de hogar recibe vivienda como parte de su salario.                                               |
+|                 | Jefe_rec_ali   | Dummy si el jefe de hogar recibe alimentación como parte de su salario.                                            |
+|                 | Jefe_ult_exp   | Tiempo de experiencia del último trabajo del jefe de hogar.                                                       |
+|                 | Jefe_Ntrab     | Número de trabajadores de la empresa en la que trabaja el jefe de hogar.                                          |
+|                 | Jefe_Strab     | Dummy si el jefe de hogar tiene un segundo trabajo.                                                               |
+|                 | Jefe_primas    | Dummy si el jefe de hogar recibe primas.                                                                         |
+|                 | Jefe_bonif     | Dummy si el jefe de hogar recibe bonificaciones.                                                                  |
+|                 | Jefe_subsidio  | Dummy si el jefe de hogar recibe subsidios.                                                                      |
+|                 | Jefe_pension   | Dummy si el jefe de hogar cotiza pensión.                                                                        |

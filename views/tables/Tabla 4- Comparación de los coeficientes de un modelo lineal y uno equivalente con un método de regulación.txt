@@ -1,0 +1,26 @@
+Variable dependiente: Ln (Ingreso Hogar)
+
+            (1 - MCO)      (2 - Regulación)
+---------------------------------------------
+Personas x Cuarto   -0.254          -0.207
+                    (0.003)
+
+N° Ocupados         0.365           0.319
+                    (0.002)
+
+Mujer               0.013           0.000
+                    (0.004)
+
+H (Cotiz. Pension)  0.529           0.488
+                    (0.005)
+
+H (Reg. Subsidiado) -0.491          -0.453
+                    (0.008)
+
+Constant            13.853          13.886
+                    (0.005)
+
+Observations        131,400         131,400
+R^2                 0.308
+R^2 Ajustado        0.308
+Residual Std. Error (df = 131394)   0.760
