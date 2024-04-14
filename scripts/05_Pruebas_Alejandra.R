@@ -21,6 +21,9 @@ p_load("tidyverse",
        "ranger") #random forest 
 library("dplyr")
 
+
+setwd(paste0(wd,"/Data"))
+
 load("base_final.RData")
 colnames(train_hogares)
 colnames(test_hogares)
