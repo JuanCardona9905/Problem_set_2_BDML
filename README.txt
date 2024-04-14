@@ -12,7 +12,7 @@ Este repositorio almacena toda la información utilizada para la solución del p
 
 * `scripts`: En esta carpeta están los _scripts_ utilizados para generar los resultados. 
 
-  * `00_main_script`: Contiene el código principal, se determina el directorio de trabajo, se cargan los paquetes necesarios y llama a los otros scripts. Para su reproducibilidad es importante determinar la ruta de trabajo. En la línea 27 puede cambiar por la ruta en donde replico el repositorio.
+  * `00_main_script`: Contiene el código principal, se determina el directorio de trabajo, se cargan los paquetes necesarios y llama a los otros scripts. Para su reproducibilidad es importante determinar la ruta de trabajo. En la línea 51 puede cambiar por la ruta en donde replico el repositorio.
   * `01_Data`:  Este código realiza la unión de las bases train de hogares y personas, y la de test de hogares y personas, que se encuentran en formato csv. Se realiza la limpieza de la base de datos, mantiene las variables de interés y realiza imputación de datos. Además, guarda los resultados en formato _.RData_ en la carpeta de `stores`.
   * `02_Estadística descriptiva`:  Se realiza gráfico para la sección de estadística descriptiva y se guarda la figura en views.
   * `03_Pruebas_Camila`: Este código realiza las estimaciones de la sección 3 del problem set 2 (Modelos de clasificación). Se exploran prediccion lineales, elastic Net y boosting. Asimismo, se explora una regresión con xgboost para clasificación indirecta.
