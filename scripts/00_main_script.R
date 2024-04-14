@@ -21,11 +21,22 @@ p_load(rio, # importación/exportación de datos
        gridExtra, # para combinar gráficos
        ggplot2, # gráficos
        caret, # para evaluación de modelos predictivos
-       data.table) # para manipulación de datos
+       data.table,# para manipulación de datos
+       glmnet,
+       caret,
+       smotefamily, #remuestreo SMOTE
+       dplyr,
+       dummy, #crear dummys
+       Metrics, #evaluation metrics for ML
+       MLeval, #Machine Learning Model Evaluation
+       pROC,
+       ROSE, #remuestreo ROSE
+       ranger,#random forest
+       xgboost) #xgboosting
 
 #se define la ruta de trabajo
 ifelse(grepl("camilabeltran", getwd()),
-       wd <- "/Users/camilabeltran/OneDrive/Educación/PEG - Uniandes/BDML/GitHub/problem_set/Problem_set_1",
+       wd <- "/Users/camilabeltran/OneDrive/Educación/PEG - UniAndes/BDML/Problem_set_2_BDML",
        ifelse(grepl("Juan",getwd()),
               wd <- "C:/Users/Juan/Documents/Problem_set_1",
               ifelse(grepl("juanp.rodriguez",getwd()),
