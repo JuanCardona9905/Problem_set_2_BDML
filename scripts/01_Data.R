@@ -4,8 +4,6 @@
 
 #### 1. Cargar Paquetes ----
 {
-#se borra la memoria
-rm(list = ls())
 #se cargan los paquetes
 library(pacman)
 p_load(rio, # importación/exportación de datos
@@ -30,19 +28,6 @@ p_load(rio, # importación/exportación de datos
        naniar) # missing
 
 #se define la ruta de trabajo
-ifelse(grepl("camilabeltran", getwd()),
-       wd <- "/Users/camilabeltran/OneDrive/Educación/PEG - Uniandes/BDML/Problem_set_2_BDML",
-       ifelse(grepl("Juan",getwd()),
-              wd <- "C:/Users/Juan/Documents/Problem_set_2_BDML",
-              ifelse(grepl("juanp.rodriguez",getwd()),
-                     wd <- "C:/Users/juanp.rodriguez/Documents/GitHub/Problem_set_1",
-                     ifelse(grepl("C:/Users/User",getwd()),
-                            wd <- "C:/Users/User/OneDrive - Universidad de los andes/Big Data y Machine Learning/Problem_set_1/Problem_set_1",
-                            ifelse(grepl("/Users/aleja/",getwd()),
-                                   wd <- "/Users/aleja/Documents/Maestría Uniandes/Clases/Big Data y Machine Learning/Repositorios Git Hub/Problem_set_2_BDML",
-                                   wd <- "otro_directorio")))))
-}
-
 #### 2. Importar bases de datos ----
 {
 ### Importar las bases de entrenamiento
