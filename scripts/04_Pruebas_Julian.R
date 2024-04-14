@@ -1,6 +1,25 @@
+rm(list = ls())
+require("pacman")
+p_load("tidyverse",
+       "glmnet",
+       "caret",
+       "smotefamily",
+       "dplyr",
+       "dummy",
+       "Metrics", # Evaluation Metrics for ML
+       "MLeval",#*MLeval: Machine Learning Model Evaluation
+       "pROC",
+       "ROSE",#remuestreo ROSE
+       "ranger") #random forest 
+
+setwd("C:/Users/user/OneDrive - Universidad de los andes/Big Data y Machine Learning/Problem_set_2_BDML/Data")
+load("base_final.RData")
+colnames(train_hogares)
+
+
 #modelo 4 - logit con remuestreo (saturado) SMOTE F1 = 0.66
 
-  #modelo 2
+  #modelo 3
   train_hogares <- train_hogares %>% #seleccionar variables
     select(-id,
            -Clase, #ya esta cabecera
@@ -97,3 +116,79 @@
   
   write.csv(predictSample1,"classification_linear_r_smote.csv", row.names = FALSE)
   
+  
+  
+################################################
+#predicción indirecta de pobreza#
+  
+#Idea principal. Realizar un random forest para observar las varibales
+# más importantes de la base. De acuerdo con eso tomaré ellas para realizar un
+#boosting :D
+  train_hogares <- train_hogares %>% #seleccionar variables
+    select(-id,
+           -Clase, #ya esta cabecera
+           -P5010, #¿en cuántos de esos cuartos duermen las personas de este hogar?
+           -P5100,#cuando paga por amort (ya esta con ln(cuota)
+           -P5140,#arriendo ya esta con ln,
+           -Npersug, #no. personas unidad gasto,
+           -Li,
+           -Fex_c)
+  
+  test_hogares <- test_hogares %>% #seleccionar variables
+    select(-Clase, #ya esta cabecera
+           -P5010, #¿en cuántos de esos cuartos duermen las personas de este hogar?
+           -P5100,#cuando paga por amort (ya esta con ln(cuota)
+           -P5140,#arriendo ya esta con ln
+           -Npersug, #no. personas unidad gasto,
+           -Fex_c)
+  train_hogares<-train_hogares %>% mutate (Lnlp <- log(Lp))
+  test_hogares<-test_hogares %>% mutate(Lnlp<- log(Lp))
+
+  
+  set.seed(6392) # Para reproducibilidad
+  train_indices <- as.integer(createDataPartition(train_hogares$Pobre, p = 0.8, list = FALSE))
+  train <- train_hogares[train_indices, ]
+  test <- train_hogares[-train_indices, ]
+  
+  set.seed(2516)
+  
+  fitControl<-trainControl(method ="cv",
+                         number=5)
+  
+  tree_ranger_grid <- train(
+    Ingtotugarr ~ DormitorXpersona + factor(Head_Mujer)  + Dominio + Head_Ocupacion + Head_EducLevel + factor(Head_ocupado) + factor(Head_Rec_subsidio) + Head_Oficio + factor(Head_Segundo_trabajo),
+    data = train,
+    method = "ranger",
+    trControl = fitControl,
+    tuneGrid = expand.grid(
+      mtry = c(1, 2, 3), 
+      splitrule = c("variance", "extratrees", "gini"), 
+      min.node.size = c(1, 3, 5)),
+    importance="impurity"
+  )
+  
+  tree_ranger_grid
+  varImp(tree_ranger_grid)
+  test$PredictRFincome <- predict(tree_ranger_grid, newdata = test)
+  test$pobre_hat1 <- ifelse(test$PredictRFincome <= test$Lp*test$Nper, 1 ,0)
+
+  test <- test %>% 
+    mutate(pobre_hat1=factor(pobre_hat1,levels=c(0,1),labels=c("No","Yes")))
+      
+      
+  confusionMatrix(data = test$pobre_hat1, 
+                  reference = test$Pobre, positive="Yes", mode = "prec_recall")
+
+  #F1=0.21
+  
+  predictSample <- test_hogares   %>% 
+    mutate(ingreso_predict= predict(tree_ranger_grid, newdata = test_hogares))  %>% select(id,ingreso_predict,Lp,Nper)
+  
+  predictSample$pobre <- ifelse(predictSample$ingreso_predict <= predictSample$Lp*predictSample$Nper, 1 ,0)
+  predictSample<- predictSample %>% 
+    select(id,pobre)
+  predictSample1 <- select(predictSample$id, predictSample$pobre) 
+write.csv(predictSample,"Regresion_indirecta_random_forest.csv", row.names=FALSE)
+
+            
+            
