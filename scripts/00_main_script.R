@@ -1,5 +1,6 @@
 #main script
-#este código contiene todos los scripts utilizados para el problem set 1
+#este código contiene todos los scripts utilizados para el problem set 2
+
 
 #se borra la memoria
 rm(list = ls())
@@ -47,18 +48,31 @@ ifelse(grepl("camilabeltran", getwd()),
                                    wd <- "/Users/aleja/Documents/Maestría Uniandes/Clases/Big Data y Machine Learning/Repositorios Git Hub/Problem_set_1)",
                                    wd <- "otro_directorio")))))
 
-#Script: "01_web_scraping.R". Realiza el proceso de web scraping para conseguir los datos
+#INSERTE SU RUTA AQUÍ:
+wd<-("C:/Users/user/OneDrive - Universidad de los andes/Big Data y Machine Learning/Problem_set_2_BDML")
+
+
+#Script: "01_Data.R". Realiza el proceso de limipeza y unión de bases de datos.
 setwd(paste0(wd,"/scripts"))
-source("01_web_scraping.R")
-#Script: "02_Data.R". Realiza la limpieza de la base de datoć y estadísticas descriptivas
+source("01_Data.R")
+
+#Script: "02_Estadística descriptica.R". Realiza gráficos de las relaciones de las variables relevantes dentro de la muestra
 setwd(paste0(wd,"/scripts"))
 source("02_data.R")
-#Script: "03_Data.R". Realiza estimaciones del perfil edad-ingreso
+
+#Script: "03_Pruebas_Camila.R". Predicciones de Clasificación directa e indirecta
 setwd(paste0(wd,"/scripts"))
-source("03_age_wage_profile.R")
-#Script: "04_The gender earnings GAP.R". Realiza estimaciones de la brecha salarial por género
+source("03_Pruebas_Camila.R")
+
+#Script: "04_Pruebas_Julian.R". Predicciones de Clasificación directa e indirecta
 setwd(paste0(wd,"/scripts"))
 source("04_gender_earnings_gap.R")
-#Script: "05_Predicting_Earnings.R". Realiza predicciones y estimaciones de cross-validation
+
+
+#Script: "05_Pruebas_Alejandra.R". Predicciones de Clasificación directa e indirecta
 setwd(paste0(wd,"/scripts"))
-source("05_predicting_earnings.R")
+source("05_Pruebas_Alejandra.R")
+
+#Script: "06_Pruebas_Jun_Pablo.R". Predicciones de Clasificación directa e indirecta
+setwd(paste0(wd,"/scripts"))
+source("06_Pruebas_Juan_Pablo.R")

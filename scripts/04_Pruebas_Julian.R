@@ -12,7 +12,7 @@ p_load("tidyverse",
        "ROSE",#remuestreo ROSE
        "ranger") #random forest 
 
-setwd("C:/Users/user/OneDrive - Universidad de los andes/Big Data y Machine Learning/Problem_set_2_BDML/Data")
+setwd(paste0(wd,"/Data"))
 load("base_final.RData")
 colnames(train_hogares)
 
