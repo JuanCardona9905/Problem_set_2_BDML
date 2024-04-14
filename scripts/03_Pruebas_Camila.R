@@ -1,29 +1,11 @@
-##prueba modelos
-
-rm(list = ls())
-require("pacman")
-p_load("tidyverse",
-       "glmnet",
-       "caret",
-       "smotefamily",
-       "dplyr",
-       "dummy",
-       "Metrics", # Evaluation Metrics for ML
-       "MLeval",#*MLeval: Machine Learning Model Evaluation
-       "pROC",
-       "ROSE",#remuestreo ROSE
-       "ranger", #random forest
-       "xgboost") #xgboosting  
-
-setwd("/Users/camilabeltran/OneDrive/Educación/PEG - UniAndes/BDML/Problem_set_2_BDML/Data")
-load("base_final.RData")
-colnames(train_hogares) 
+##pruebas modelos
 
 #modelo 1 - logit con remuestreo SMOTE F1 = 0.58
 #variables: train_hogares <- train_hogares %>% #seleccionar variables
 #       select(Dominio, Ocup_vivienda, Nper, maxEducLevel, nocupados, nincapacitados,
 #       Cabecera, DormitorXpersona, Head_Mujer, ntrabajo_menores, Pobre)
 {
+load("base_final.RData")  
 train_hogares <- train_hogares %>% #seleccionar variables
   select(Dominio, Ocup_vivienda, Nper, maxEducLevel, nocupados, nincapacitados,
          Cabecera, DormitorXpersona, Head_Mujer, ntrabajo_menores, Pobre)
@@ -101,7 +83,7 @@ confusionMatrix(data = test$pobre_hat_logit_smote,
 
 #modelo 2 - elastic net con remuestreo SMOTE F1 = 0.66 Kaggle
 {
-#modelo 2
+load("base_final.RData")
 train_hogares <- train_hogares %>% #seleccionar variables
          select(-id,
                 -Clase, #ya esta cabecera
@@ -223,7 +205,7 @@ write.csv(predictSample,"classification_elasticnet_smote.csv", row.names = FALSE
 
 #modelo 3 - model tuning elastic net con remuestreo SMOTE
 {
-  #modelo 3
+  load("base_final.RData")
   train_hogares <- train_hogares %>% #seleccionar variables
     select(-id,
            -Clase, #ya esta cabecera
@@ -323,24 +305,11 @@ write.csv(predictSample,"classification_elasticnet_smote.csv", row.names = FALSE
   
   rfThresh_lasso <- coords(roc_obj_lasso, x = "best", best.method = "closest.topleft")
   rfThresh_lasso
-  pred_lasso<-factor(ifelse(glm_model_en_f1$pred$Yes[glm_model_en_f1$pred$lambda==glm_model_en_f1$bestTune$lambda]>=rfThresh_lasso$threshold,
-                            "Yes","No"),levels=c("Yes","No"))
-  confusionMatrix(data = pred_lasso, 
-                  reference = glm_model_en_f1$pred$obs[glm_model_en_f1$pred$lambda==glm_model_en_f1$bestTune$lambda], 
-                  positive="Yes", mode = "prec_recall")
-  
-  prec_recall<-data.frame(coords(roc_obj_lasso, seq(0,1,length=100), ret=c("threshold", "precision", "recall")))
-  prec_recall<- prec_recall  %>% mutate(F1=(2*precision*recall)/(precision+recall))
-  prec_recall$threshold[which.max(prec_recall$F1)]
-  pred_lasso_F1<-factor(ifelse(glm_model_en_f1$pred$Yes[glm_model_en_f1$pred$lambda==glm_model_en_f1$bestTune$lambda]>=prec_recall$threshold[which.max(prec_recall$F1)],
-                               "Yes","No"),levels=c("Yes","No"))
-  confusionMatrix(data = pred_lasso_F1, 
-                  reference = glm_model_en_f1$pred$obs[glm_model_en_f1$pred$lambda==glm_model_en_f1$bestTune$lambda], 
-                  positive="Yes", mode = "prec_recall")
 }
 
 #modelo 4 - elastic net con remuestreo ROSE 
 {
+  load("base_final.RData")
   train_hogares <- train_hogares %>% #seleccionar variables
     select(-id,
            -Clase, #ya esta cabecera
@@ -438,150 +407,12 @@ write.csv(predictSample,"classification_elasticnet_smote.csv", row.names = FALSE
   
   #F1 = O.61
   
-  # Predicción Kaggle 1
-  predictSample <- test_hogares   %>% 
-    mutate(Pobre = predict(model1, newdata = test_hogares, type = "raw"))  %>% select(id,Pobre)
-  
-  predictSample<- predictSample %>% 
-    mutate(pobre=ifelse(Pobre=="Yes",1,0)) %>% 
-    select(id,pobre)
-  
-  write.csv(predictSample,"classification_elasticnet_smote.csv", row.names = FALSE)
-  
-}
-
-#modelo 5 - elastic net con remuestreo SMOTE (var de conyuge y % de personas)
-{
-  #modelo 5
-
-  train_hogares <- train_hogares %>%
-    mutate(
-      prop_mujeres <- nmujeres/Nper,
-      prop_ocupados <- nocupados/Nper,
-      prop_incapacitados <- nincapacitados/Nper,
-      soltero_menores <- ifelse(Head_Mujer==0&nmenores_5>0&nmenores_6_11>0&nmenores_12_17>0&nconyuge==0,0,1),
-      soltera_menores <- ifelse(Head_Mujer==1&nmenores_5>0&nmenores_6_11>0&nmenores_12_17>0&nconyuge==0,0,1))
-  
-  test_hogares <- test_hogares %>%
-    mutate(
-      prop_mujeres <- nmujeres/Nper,
-      prop_ocupados <- nocupados/Nper,
-      prop_incapacitados <- nincapacitados/Nper,
-      soltero_menores <- ifelse(Head_Mujer==0&nmenores_5>0&nmenores_6_11>0&nmenores_12_17>0&nconyuge==0,0,1),
-      soltera_menores <- ifelse(Head_Mujer==1&nmenores_5>0&nmenores_6_11>0&nmenores_12_17>0&nconyuge==0,0,1))
-  
-  train_hogares <- train_hogares %>% #seleccionar variables
-    select(-id,
-           -Clase, #ya esta cabecera
-           -P5010, #¿en cuántos de esos cuartos duermen las personas de este hogar?
-           -P5100,#cuando paga por amort (ya esta con ln(cuota)
-           -P5140,#arriendo ya esta con ln,
-           -Npersug, #no. personas unidad gasto,
-           -Ingtotug,
-           -Ingtotugarr,
-           -Li,
-           -Lp,
-           -Ingpcug,
-           -Ln_Ing_tot_hogar_imp_arr,
-           -Ln_Ing_tot_hogar_per_cap,
-           -Ln_Ing_tot_hogar,
-           -Fex_c,
-           -nmujeres,
-           -nocupados,
-           -nincapacitados,
-           -nconyuge)
-  
-  dummys <- dummy(subset(train_hogares, select = c(Dominio, Depto, Ocup_vivienda, maxEducLevel, 
-                                                   Head_EducLevel, Head_Oficio, Head_Ocupacion,
-                                                   Cony_EducLevel, Cony_Oficio, Cony_Ocupacion)))
-  
-  dummys <- as.data.frame(apply(dummys,2,function(x){as.numeric(x)}))
-  
-  train_hogares <- cbind(subset(train_hogares, select = -c(Dominio, Depto, Ocup_vivienda, maxEducLevel, 
-                                                           Head_EducLevel, Head_Oficio, Head_Ocupacion,
-                                                           Cony_EducLevel, Cony_Oficio, Cony_Ocupacion)),dummys)
-  
-  test_hogares <- test_hogares %>% #seleccionar variables
-    select(-Clase, #ya esta cabecera
-           -P5010, #¿en cuántos de esos cuartos duermen las personas de este hogar?
-           -P5100,#cuando paga por amort (ya esta con ln(cuota)
-           -P5140,#arriendo ya esta con ln,
-           -Li,
-           -Lp,
-           -Npersug, #no. personas unidad gasto,
-           -Fex_c,
-           -nmujeres,
-           -nocupados,
-           -nincapacitados,
-           -nconyuge)
-  
-  dummys <- dummy(subset(test_hogares, select = c(Dominio, Depto, Ocup_vivienda, maxEducLevel, 
-                                                  Head_EducLevel, Head_Oficio, Head_Ocupacion,
-                                                  Cony_EducLevel, Cony_Oficio, Cony_Ocupacion)))
-  dummys <- as.data.frame(apply(dummys,2,function(x){as.numeric(x)}))
-  
-  test_hogares <- cbind(subset(test_hogares, select = -c(Dominio, Depto, Ocup_vivienda, maxEducLevel, 
-                                                         Head_EducLevel, Head_Oficio, Head_Ocupacion,
-                                                         Cony_EducLevel, Cony_Oficio, Cony_Ocupacion)),dummys)
-  
-  #dejar variables que comparten test y train depsues de crear dummys
-  train_hogares <- train_hogares[c(colnames(test_hogares)[2:ncol(test_hogares)],"Pobre")]
-  
-  # Dividir los datos en conjuntos de entrenamiento (train) y prueba (test)
-  set.seed(6392) # Para reproducibilidad
-  train_indices <- as.integer(createDataPartition(train_hogares$Pobre, p = 0.8, list = FALSE))
-  train <- train_hogares[train_indices, ]
-  test <- train_hogares[-train_indices, ]
-  prop.table(table(train$Pobre))
-  prop.table(table(test$Pobre))
-  
-  predictors <- colnames(train  %>% select(-Pobre))
-  smote_output <- SMOTE(X = train[predictors],
-                        target = train$Pobre)
-  smote_data <- smote_output$data
-  
-  table(train$Pobre)
-  table(smote_data$class)
-  
-  set.seed(6392)
-  
-  ctrl<- trainControl(method = "cv",
-                      number = 5,
-                      classProbs = TRUE,
-                      savePredictions = T)
-  
-  model1 <- train(class~.,
-                  data=smote_data,
-                  metric = "Accuracy",
-                  method = "glmnet",
-                  trControl = ctrl,
-                  tuneGrid=expand.grid(
-                    alpha = seq(0,1,by=.2),
-                    lambda =10^seq(10, -2, length = 10)))
-  
-  model1
-  
-  test<- test  %>% mutate(pobre_hat_model1=predict(model1,newdata = test,
-                                                   type = "raw"))
-  confusionMatrix(data = test$pobre_hat_model1, 
-                  reference = test$Pobre, positive="Yes", mode = "prec_recall")
-  
-  #F1 = O.66
-  
-  predictSample <- test_hogares   %>% 
-    mutate(Pobre = predict(model1, newdata = test_hogares, type = "raw"))  %>% select(id,Pobre)
-  
-  predictSample<- predictSample %>% 
-    mutate(pobre=ifelse(Pobre=="Yes",1,0)) %>% 
-    select(id,pobre)
-  
-  write.csv(predictSample,"classification_elasticnet_smote_mas_variables.csv", row.names = FALSE)
-  
 }
 
 #buscar variables mas importantes
 {
-train_hogares <- train_hogares %>% #seleccionar variables
+  load("base_final.RData")
+  train_hogares <- train_hogares %>% #seleccionar variables
   select(-id,
          -Clase, #ya esta cabecera
          -P5010, #¿en cuántos de esos cuartos duermen las personas de este hogar?
@@ -615,6 +446,7 @@ summary(model_logit)
 
 #random forest con cross-validation 1 (algunas variables)
 {
+  load("base_final.RData")
 train_hogares <- train_hogares %>% 
     select(Pobre,Dominio,Depto,N_cuartos_hog,Nper,nmenores_5
            ,nmenores_6_11,nmenores_12_17,nocupados,nincapacitados,ntrabajo_menores,
@@ -683,10 +515,6 @@ train_hogares <- train_hogares %>%
     select(id,pobre)
   
   write.csv(predictSample,"classification_random_forest1.csv", row.names = FALSE)
-
-  #aucval_rf <- Metrics::auc(actual = Pobre,predicted =rf_pred[,2])
-  #aucval_rf
-  
   
 }
 
@@ -791,14 +619,20 @@ train_hogares <- train_hogares %>%
     mutate(pobre=ifelse(Pobre=="Yes",1,0)) %>% 
     select(id,pobre)
   
-  #write.csv(predictSample,"classification_random_forest2.csv", row.names = FALSE)
-  
-  #aucval_rf <- Metrics::auc(actual = Pobre,predicted =rf_pred[,2])
-  #aucval_rf
+  write.csv(predictSample,"classification_random_forest2.csv", row.names = FALSE)
 }
 
 #random forest con cv 3, todas variables y SMOTE 
 #Kaggle puntaje = 0.63
+#Type:                             Probability estimation 
+#  Number of trees:                  500 
+#  Sample size:                      184809 
+#  Number of independent variables:  187 
+#  Mtry:                             30 
+#  Target node size:                 50 
+#  Variable importance mode:         none 
+#  Splitrule:                        gini 
+#  OOB prediction error (Brier s.):  0.06681718   
 {
   load("base_final.RData")
   train_hogares <- train_hogares %>% #seleccionar variables
