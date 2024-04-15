@@ -4,9 +4,6 @@
 
 #### 1. Cargar Paquetes ----
 {
-  #se borra la memoria
-  rm(list = ls())
-  
   require("pacman")
   p_load("tidyverse",
          "glmnet",
@@ -16,13 +13,8 @@
          "dummy",
          "MLeval",
          "pROC") #*MLeval: Machine Learning Model Evaluation
-  
-  
-  #se define la ruta de trabajo
-  
-  setwd("C:/Users/Juan/Documents/Problem_set_2_BDML/Data")
-  
-  
+ 
+  setwd(paste0(wd,"/Data"))
   load("base_final.RData")
   colnames(train_hogares) 
 }
@@ -543,9 +535,6 @@
 
 #### 1. Cargar paquetes ----
 {
-  install.packages("pacman")
-  
-  rm(list = ls())
   require("pacman")
   p_load("tidyverse",
          "glmnet",
@@ -555,10 +544,6 @@
          "dummy",
          "MLeval",
          "pROC") #*MLeval: Machine Learning Model Evaluation
-  
-  
-  setwd("C:/Users/Juan/Documents/Problem_set_2_BDML/Data")
-  
   
   load("base_final.RData")
   colnames(train_hogares) 

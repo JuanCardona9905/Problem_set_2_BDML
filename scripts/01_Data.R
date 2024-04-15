@@ -3,45 +3,6 @@
 ##################################################
 
 #### 1. Cargar Paquetes ----
-{
-#se borra la memoria
-rm(list = ls())
-#se cargan los paquetes
-library(pacman)
-p_load(rio, # importación/exportación de datos
-       tidyverse, # datos ordenados (ggplot y Tidyverse)
-       skimr, # datos de resumen
-       visdat, # visualización de datos faltantes
-       corrplot, # gráficos de correlación
-       stargazer, # tablas/salida a TEX.
-       rvest, # web-scraping
-       readxl,
-       readr, # importar Excel
-       writexl, # exportar Excel
-       boot, # bootstrapping
-       ggpubr, # extensiones de ggplot2
-       WVPlots, # gráficos de variables ponderadas
-       patchwork, # para combinar gráficos
-       gridExtra, # para combinar gráficos
-       ggplot2, # gráficos
-       caret, # para evaluación de modelos predictivos
-       glmnet, # para evaluación de modelos predictivos
-       data.table, # para manipulación de datos
-       naniar) # missing
-
-#se define la ruta de trabajo
-ifelse(grepl("camilabeltran", getwd()),
-       wd <- "/Users/camilabeltran/OneDrive/Educación/PEG - Uniandes/BDML/Problem_set_2_BDML",
-       ifelse(grepl("Juan",getwd()),
-              wd <- "C:/Users/Juan/Documents/Problem_set_2_BDML",
-              ifelse(grepl("juanp.rodriguez",getwd()),
-                     wd <- "C:/Users/juanp.rodriguez/Documents/GitHub/Problem_set_1",
-                     ifelse(grepl("C:/Users/User",getwd()),
-                            wd <- "C:/Users/User/OneDrive - Universidad de los andes/Big Data y Machine Learning/Problem_set_1/Problem_set_1",
-                            ifelse(grepl("/Users/aleja/",getwd()),
-                                   wd <- "/Users/aleja/Documents/Maestría Uniandes/Clases/Big Data y Machine Learning/Repositorios Git Hub/Problem_set_2_BDML",
-                                   wd <- "otro_directorio")))))
-}
 
 #### 2. Importar bases de datos ----
 {
@@ -78,29 +39,6 @@ colnames(train_hogares)
 colnames(test_hogares)
 # Los hogares no tienen la variable Orden porque las personas estan 
 # agrupadas o colapsadas en id
-}
-
-{ # Grafica que divide a pobres
-  train_hogares_Graf <-  train_hogares %>% 
-    filter(Ingtotug < 2000000) %>% 
-    mutate(y = density(Ingtotug))
-  
-  ggplot(train_hogares_Graf, aes(x = Ingpcug)) +
-    geom_density(fill = "blue", alpha = 0.5) +
-    geom_vline(xintercept = mean(train_hogares$Lp), color = "red", linetype = "dashed") +
-    labs(x = "Ingreso", y = "Densidad") +
-    theme_minimal()
-  
-  media_ingreso <- mean(train_hogares$Lp)
-  ggplot(train_hogares_Graf, aes(x = Ingpcug)) +
-    geom_histogram(data = subset(train_hogares_Graf, Ingpcug < media_ingreso), fill = "red", bins = 40) +
-    geom_histogram(data = subset(train_hogares_Graf, Ingpcug >= media_ingreso), fill = "blue", bins = 40) +
-    geom_vline(aes(xintercept = media_ingreso), color = "green", linetype = "dashed", size = 1) +
-    theme_minimal() +
-    labs(title = "Distribución del Ingreso",
-         subtitle = "Observaciones por debajo y por encima de la media",
-         x = "Ingreso",
-         y = "Frecuencia")
 }
 
 #### 3. Modificacion base de datos ----
@@ -304,4 +242,4 @@ save.image("base_final.RData")
   #   geom_vline(xintercept = train_hogares_2$ln_Lp, colour = "grey", linetype = 2)+
   #   stat_smooth(method = "lm", se = F) +
   #   labs(x = "Ingreso", y = "Pago arriendo")
-  }
+}
