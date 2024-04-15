@@ -33,4 +33,6 @@ Este repositorio almacena toda la información utilizada para la solución del p
 
   * `views/figures'
 	-Figura 1 Histograma del ingreso de los hogares clasificados por pobreza.
+	-Figura 2 Árbol 1. Clasificación con XGBoosting
+        -Figura 3 Árbol 499. Clasificación con XGBoosting
     
