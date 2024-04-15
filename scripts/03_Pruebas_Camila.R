@@ -1,4 +1,5 @@
 ##pruebas modelos
+setwd(paste0(wd,"/Data"))
 
 #modelo 1 - logit con remuestreo SMOTE F1 = 0.58
 #variables: train_hogares <- train_hogares %>% #seleccionar variables
@@ -848,8 +849,17 @@ train_hogares <- train_hogares %>%
     mutate(pobre=ifelse(Pobre=="Yes",1,0)) %>% 
     select(id,pobre)
   
+  # Obtener la importancia de las características del modelo
+  importance <- xgb.importance(model = model1$finalModel)
+  
+  # Seleccionar la característica más importante
+  feature_most_important <- importance$Feature[1]
+  
+  tree_index <- which(importance$Feature == feature_most_important)
+  xgb.plot.tree(model = model1$finalModel, trees = tree_index, plot_width = 1000, plot_height = 1000)
+  
   #Kaggle puntaje = 0.67
-  #write.csv(predictSample,"classification_xgboosting.csv", row.names = FALSE)
+  write.csv(predictSample,"classification_xgboosting.csv", row.names = FALSE)
 }
 
 #xgboosting con todas las variables (indirecta)
